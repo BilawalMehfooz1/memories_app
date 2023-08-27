@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memories_app/models/theme.dart';
+import 'package:memories_app/screens/auth_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: lightTheme,
-      home: Scaffold(),
+      home: const AuthScreen(),
     );
   }
 }
