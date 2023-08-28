@@ -5,7 +5,7 @@ final ThemeData lightTheme = ThemeData(
   useMaterial3: true,
   brightness: Brightness.light,
   colorScheme: const ColorScheme.light(
-    primary: Color.fromRGBO(251, 2, 39, 1),
+    primary: Color.fromRGBO(178, 5, 31, 1),
   ),
   scaffoldBackgroundColor: const Color.fromRGBO(255, 250, 240, 1.0),
   // appBarTheme: AppBarTheme(
@@ -17,5 +17,11 @@ final ThemeData lightTheme = ThemeData(
   //     fontWeight: FontWeight.bold,
   //   ),
   // ),
-  textTheme: GoogleFonts.montserratTextTheme(),
+  textTheme: GoogleFonts.montserratTextTheme().copyWith(
+    titleLarge: GoogleFonts.euphoriaScript(
+      fontSize: 40.0, 
+      color: Colors.black,
+      fontWeight: FontWeight.bold,
+    ),
+  ),
 );
