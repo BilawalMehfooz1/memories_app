@@ -9,10 +9,8 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  // var _enteredEmail = '';
-  // var _enteredPassword = '';
-  // var _enteredUsername = '';
   final _isLogin = false;
+
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context);
@@ -29,51 +27,68 @@ class _AuthScreenState extends State<AuthScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Form(
-                      child: Column(
-                        children: [
-                          Text(
-                            'Memories',
-                            style: style.textTheme.titleLarge,
-                          ),
-                          if (!_isLogin) const AuthInput(labelText: 'Username'),
-                          const SizedBox(height: 12),
-                          const AuthInput(labelText: 'Email Address'),
-                          const SizedBox(height: 12),
-                          const AuthInput(labelText: 'Password'),
-                          const SizedBox(height: 20),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  style.colorScheme.primaryContainer,
-                              foregroundColor:
-                                  style.colorScheme.onPrimaryContainer,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(15),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return Column(
+                            children: [
+                              Text(
+                                'Memories',
+                                style: style.textTheme.titleLarge,
+                              ),
+                              const SizedBox(height: 30),
+                              if (!_isLogin)
+                                const AuthInput(
+                                  obsecureText: false,
+                                  labelText: 'Username',
+                                  keyboardType: TextInputType.name,
+                                ),
+                              const SizedBox(height: 15),
+                              const AuthInput(
+                                obsecureText: false,
+                                labelText: 'Email Address',
+                                keyboardType: TextInputType.emailAddress,
+                              ),
+                              const SizedBox(height: 15),
+                              const AuthInput(
+                                labelText: 'Password',
+                                obsecureText: true,
+                                keyboardType: TextInputType.text,
+                              ),
+                              const SizedBox(height: 20),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      style.colorScheme.primaryContainer,
+                                  foregroundColor:
+                                      style.colorScheme.onPrimaryContainer,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(15),
+                                    ),
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: 15,
+                                    horizontal: (constraints.maxWidth - 60) / 2,
+                                  ),
+                                ),
+                                onPressed: () {},
+                                child: const Text(
+                                  'Log in',
+                                  style: TextStyle(fontSize: 18),
                                 ),
                               ),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 15,
-                                horizontal: 130,
+                              TextButton(
+                                onPressed: () {},
+                                child: Text(
+                                  'I already have an account',
+                                  style: TextStyle(
+                                    color: Colors.grey[800],
+                                  ),
+                                ),
                               ),
-                            ),
-                            onPressed: () {},
-                            child: const Text(
-                              'Log in',
-                              style: TextStyle(fontSize: 18),
-                            ),
-                          ),
-                          // const SizedBox(height: 10),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              'I already have an account',
-                              style: TextStyle(
-                                  color:
-                                      style.colorScheme.onSecondaryContainer),
-                            ),
-                          ),
-                        ],
+                            ],
+                          );
+                        },
                       ),
                     ),
                   ),
