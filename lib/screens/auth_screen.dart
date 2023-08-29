@@ -9,6 +9,7 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
+  final _form = GlobalKey<FormState>();
   var _isLogin = false;
 
   @override
@@ -27,6 +28,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Form(
+                      key: _form,
                       child: LayoutBuilder(
                         builder: (context, constraints) {
                           return Column(
@@ -37,22 +39,45 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                               const SizedBox(height: 30),
                               if (!_isLogin)
-                                const AuthInput(
+                                AuthInput(
                                   obsecureText: false,
                                   labelText: 'Username',
                                   keyboardType: TextInputType.name,
+                                  validator: (value) {
+                                    if (value == null ||
+                                        !value.contains('@') ||
+                                        value.trim().isEmpty) {
+                                      return 'Please enter atleast 4 characters.';
+                                    }
+                                    return null;
+                                  },
                                 ),
                               const SizedBox(height: 15),
-                              const AuthInput(
+                              AuthInput(
                                 obsecureText: false,
                                 labelText: 'Email Address',
                                 keyboardType: TextInputType.emailAddress,
+                                validator: (value) {
+                                  if (value == null ||
+                                      value.trim().length < 4 ||
+                                      value.trim().isEmpty) {
+                                    return 'Please enter a valid email address.';
+                                  }
+                                  return null;
+                                },
                               ),
                               const SizedBox(height: 15),
-                              const AuthInput(
+                              AuthInput(
                                 labelText: 'Password',
                                 obsecureText: true,
                                 keyboardType: TextInputType.text,
+                                validator: (value) {
+                                  if (value == null ||
+                                      value.trim().length < 6) {
+                                    return 'Password must be at least 6 characters long.';
+                                  }
+                                  return null;
+                                },
                               ),
                               const SizedBox(height: 20),
                               ElevatedButton(

@@ -6,16 +6,17 @@ class AuthInput extends StatelessWidget {
     required this.labelText,
     required this.keyboardType,
     required this.obsecureText,
+    required this.validator,
   });
   final bool obsecureText;
   final String labelText;
   final TextInputType keyboardType;
+  final FormFieldValidator<String> validator;
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       keyboardType: keyboardType,
       obscureText: obsecureText,
-      
       decoration: InputDecoration(
         labelText: labelText,
         labelStyle: const TextStyle(fontSize: 13),
@@ -33,6 +34,7 @@ class AuthInput extends StatelessWidget {
         ),
       ),
       onSaved: (newValue) {},
+      validator: validator,
     );
   }
 }
