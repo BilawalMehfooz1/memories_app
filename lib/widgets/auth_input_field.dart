@@ -15,6 +15,7 @@ class AuthInput extends StatelessWidget {
     return TextFormField(
       keyboardType: keyboardType,
       obscureText: obsecureText,
+      
       decoration: InputDecoration(
         labelText: labelText,
         labelStyle: const TextStyle(fontSize: 13),

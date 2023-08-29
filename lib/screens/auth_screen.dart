@@ -9,7 +9,7 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  final _isLogin = false;
+  var _isLogin = false;
 
   @override
   Widget build(BuildContext context) {
@@ -68,19 +68,25 @@ class _AuthScreenState extends State<AuthScreen> {
                                   ),
                                   padding: EdgeInsets.symmetric(
                                     vertical: 15,
-                                    horizontal: (constraints.maxWidth - 60) / 2,
+                                    horizontal: (constraints.maxWidth - 70) / 2,
                                   ),
                                 ),
                                 onPressed: () {},
-                                child: const Text(
-                                  'Log in',
-                                  style: TextStyle(fontSize: 18),
+                                child: Text(
+                                  _isLogin ? 'Log in' : 'Sign up',
+                                  style: const TextStyle(fontSize: 17),
                                 ),
                               ),
                               TextButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  setState(() {
+                                    _isLogin = !_isLogin;
+                                  });
+                                },
                                 child: Text(
-                                  'I already have an account',
+                                  _isLogin
+                                      ? 'Create an account'
+                                      : 'I already have an account',
                                   style: TextStyle(
                                     color: Colors.grey[800],
                                   ),
