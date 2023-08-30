@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "241226161428",
+    "project_id": "memoris-app-a46e9",
+    "storage_bucket": "memoris-app-a46e9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:241226161428:android:3148accaf46876f52f7601",
+        "android_client_info": {
+          "package_name": "com.example.memories_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "241226161428-oqt46qm0rbkpuif7k31lfer28np6emp8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSMVftzGKCiMj2FIOKPf-Ml4QGF87VhdI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "241226161428-oqt46qm0rbkpuif7k31lfer28np6emp8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

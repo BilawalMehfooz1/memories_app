@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>241226161428-istj70331bks0ka3rr65k4is08r233s9.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.241226161428-istj70331bks0ka3rr65k4is08r233s9</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDPu_u0HMte7aCWsHb2dDIb6AiV6tyXgE8</string>
+	<key>GCM_SENDER_ID</key>
+	<string>241226161428</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.memoriesApp</string>
+	<key>PROJECT_ID</key>
+	<string>memoris-app-a46e9</string>
+	<key>STORAGE_BUCKET</key>
+	<string>memoris-app-a46e9.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:241226161428:ios:a8800485d3db123d2f7601</string>
+</dict>
+</plist>

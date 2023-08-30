@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:memories_app/models/theme.dart';
 import 'package:memories_app/screens/auth_screen.dart';
 
-void main() {
+import 'firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+void main() async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
