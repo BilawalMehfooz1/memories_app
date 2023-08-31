@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:memories_app/widgets/auth_input_field.dart';
+
+final _firebase = FirebaseAuth.instance;
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -10,7 +13,27 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   final _form = GlobalKey<FormState>();
+  var _enteredEmail = '';
+  var _enteredPassword = '';
+  var _enteredUserName = '';
   var _isLogin = false;
+
+  void _submit() {
+    final isValid = _form.currentState!.validate();
+    if (!isValid) {
+      return;
+    }
+
+    _form.currentState!.validate();
+
+    if (_isLogin) {
+    } else {
+      _firebase.createUserWithEmailAndPassword(
+        email: _enteredEmail,
+        password: _enteredPassword,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +63,12 @@ class _AuthScreenState extends State<AuthScreen> {
                               const SizedBox(height: 30),
                               if (!_isLogin)
                                 AuthInput(
+                                  onsaved: (newValue) {
+                                    if (newValue == null) {
+                                      return;
+                                    }
+                                    _enteredUserName = newValue;
+                                  },
                                   obsecureText: false,
                                   labelText: 'Username',
                                   keyboardType: TextInputType.name,
@@ -54,6 +83,12 @@ class _AuthScreenState extends State<AuthScreen> {
                                 ),
                               const SizedBox(height: 15),
                               AuthInput(
+                                onsaved: (newValue) {
+                                  if (newValue == null) {
+                                    return;
+                                  }
+                                  _enteredEmail = newValue;
+                                },
                                 obsecureText: false,
                                 labelText: 'Email Address',
                                 keyboardType: TextInputType.emailAddress,
@@ -68,6 +103,12 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                               const SizedBox(height: 15),
                               AuthInput(
+                                onsaved: (newValue) {
+                                  if (newValue == null) {
+                                    return;
+                                  }
+                                  _enteredPassword = newValue;
+                                },
                                 labelText: 'Password',
                                 obsecureText: true,
                                 keyboardType: TextInputType.text,
@@ -96,7 +137,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                     horizontal: (constraints.maxWidth - 70) / 2,
                                   ),
                                 ),
-                                onPressed: () {},
+                                onPressed: _submit,
                                 child: Text(
                                   _isLogin ? 'Log in' : 'Sign up',
                                   style: const TextStyle(fontSize: 17),
