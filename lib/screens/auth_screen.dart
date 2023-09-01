@@ -24,26 +24,30 @@ class _AuthScreenState extends State<AuthScreen> {
       return;
     }
 
-    _form.currentState!.validate();
+    _form.currentState!.save();
 
-    if (_isLogin) {
-    } else {
-      try {
+    try {
+      if (_isLogin) {
+        final userCredentials = await _firebase.signInWithEmailAndPassword(
+          email: _enteredEmail,
+          password: _enteredPassword,
+        );
+      } else {
         final userCredentials = await _firebase.createUserWithEmailAndPassword(
           email: _enteredEmail,
           password: _enteredPassword,
         );
         print(userCredentials);
-      } on FirebaseAuthException catch (error) {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              error.message ?? 'Authentication failed.',
-            ),
-          ),
-        );
       }
+    } on FirebaseAuthException catch (error) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error.message ?? 'Authentication failed.',
+          ),
+        ),
+      );
     }
   }
 
@@ -75,7 +79,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               const SizedBox(height: 30),
                               if (!_isLogin)
                                 AuthInput(
-                                  onsaved: (newValue) {
+                                  onSaved: (newValue) {
                                     if (newValue == null) {
                                       return;
                                     }
@@ -86,16 +90,16 @@ class _AuthScreenState extends State<AuthScreen> {
                                   keyboardType: TextInputType.name,
                                   validator: (value) {
                                     if (value == null ||
-                                        !value.contains('@') ||
+                                        value.trim().length < 4 ||
                                         value.trim().isEmpty) {
-                                      return 'Please enter atleast 4 characters.';
+                                      return 'Username should be at least 4 characters.';
                                     }
                                     return null;
                                   },
                                 ),
                               const SizedBox(height: 15),
                               AuthInput(
-                                onsaved: (newValue) {
+                                onSaved: (newValue) {
                                   if (newValue == null) {
                                     return;
                                   }
@@ -106,7 +110,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                 keyboardType: TextInputType.emailAddress,
                                 validator: (value) {
                                   if (value == null ||
-                                      value.trim().length < 4 ||
+                                      !value.contains('@') ||
                                       value.trim().isEmpty) {
                                     return 'Please enter a valid email address.';
                                   }
@@ -115,7 +119,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                               const SizedBox(height: 15),
                               AuthInput(
-                                onsaved: (newValue) {
+                                onSaved: (newValue) {
                                   if (newValue == null) {
                                     return;
                                   }

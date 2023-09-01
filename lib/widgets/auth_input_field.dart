@@ -7,13 +7,13 @@ class AuthInput extends StatelessWidget {
     required this.keyboardType,
     required this.obsecureText,
     required this.validator,
-    required this.onsaved,
+    required this.onSaved,
   });
   final bool obsecureText;
   final String labelText;
   final TextInputType keyboardType;
   final FormFieldValidator<String> validator;
-  final FormFieldSetter<String> onsaved;
+  final FormFieldSetter<String> onSaved;
   @override
   Widget build(BuildContext context) {
     return TextFormField(
@@ -35,7 +35,7 @@ class AuthInput extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
         ),
       ),
-      onSaved: onsaved,
+      onSaved: onSaved,
       validator: validator,
     );
   }
