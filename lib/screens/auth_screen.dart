@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:memories_app/widgets/auth_input_field.dart';
+import 'package:memories_app/widgets/user_image_picker.dart';
 
 final _firebase = FirebaseAuth.instance;
 
@@ -16,7 +17,7 @@ class _AuthScreenState extends State<AuthScreen> {
   var _enteredEmail = '';
   var _enteredPassword = '';
   var _enteredUserName = '';
-  var _isLogin = false;
+  var _isLogin = true;
 
   void _submit() async {
     final isValid = _form.currentState!.validate();
@@ -77,6 +78,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                 style: style.textTheme.titleLarge,
                               ),
                               const SizedBox(height: 30),
+                              if (!_isLogin) const UserImagePicker(),
                               if (!_isLogin)
                                 AuthInput(
                                   onSaved: (newValue) {
