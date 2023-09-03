@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:memories_app/widgets/auth_input_field.dart';
@@ -17,11 +19,27 @@ class _AuthScreenState extends State<AuthScreen> {
   var _enteredEmail = '';
   var _enteredPassword = '';
   var _enteredUserName = '';
+  File? _selectedImage;
   var _isLogin = true;
 
   void _submit() async {
+    UserCredential userCredentials;
     final isValid = _form.currentState!.validate();
     if (!isValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill the form correctly.'),
+        ),
+      );
+      return;
+    }
+    if (!_isLogin && _selectedImage == null) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a profile image.'),
+        ),
+      );
       return;
     }
 
@@ -29,16 +47,22 @@ class _AuthScreenState extends State<AuthScreen> {
 
     try {
       if (_isLogin) {
-        final userCredentials = await _firebase.signInWithEmailAndPassword(
+        userCredentials = await _firebase.signInWithEmailAndPassword(
           email: _enteredEmail,
           password: _enteredPassword,
         );
       } else {
-        final userCredentials = await _firebase.createUserWithEmailAndPassword(
+        userCredentials = await _firebase.createUserWithEmailAndPassword(
           email: _enteredEmail,
           password: _enteredPassword,
         );
-        print(userCredentials);
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('user_images')
+            .child('${userCredentials.user!.uid}.jpg');
+        await storageRef.putFile(_selectedImage!);
+        final imageUrl = await storageRef.getDownloadURL();
+        print(imageUrl);
       }
     } on FirebaseAuthException catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -78,7 +102,13 @@ class _AuthScreenState extends State<AuthScreen> {
                                 style: style.textTheme.titleLarge,
                               ),
                               const SizedBox(height: 30),
-                              if (!_isLogin) const UserImagePicker(),
+                              if (!_isLogin)
+                                UserImagePicker(
+                                  onPickedImage: (pickedImage) {
+                                    _selectedImage = pickedImage;
+                                  },
+                                ),
+                              const SizedBox(height: 10),
                               if (!_isLogin)
                                 AuthInput(
                                   onSaved: (newValue) {

@@ -4,8 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class UserImagePicker extends StatefulWidget {
-  const UserImagePicker({super.key});
+  const UserImagePicker({
+    super.key,
+    required this.onPickedImage,
+  });
 
+  final void Function(File pickedImage) onPickedImage;
   @override
   State<UserImagePicker> createState() => _UserImagePickerState();
 }
@@ -26,6 +30,7 @@ class _UserImagePickerState extends State<UserImagePicker> {
     setState(() {
       _pickedImageFile = File(pickedImage.path);
     });
+    widget.onPickedImage(_pickedImageFile!);
   }
 
   void _pickGalleryImage() async {
@@ -49,9 +54,16 @@ class _UserImagePickerState extends State<UserImagePicker> {
       children: [
         CircleAvatar(
           radius: 40,
-          backgroundColor: Colors.grey,
+          backgroundColor: Colors.grey[600],
           foregroundImage:
               _pickedImageFile != null ? FileImage(_pickedImageFile!) : null,
+          child: _pickedImageFile == null
+              ? Icon(
+                  Icons.person,
+                  size: 60,
+                  color: Colors.grey[900],
+                )
+              : null,
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -64,10 +76,10 @@ class _UserImagePickerState extends State<UserImagePicker> {
               ),
             ),
             TextButton.icon(
-              onPressed: _pickImage,
+              onPressed: _pickGalleryImage,
               icon: const Icon(Icons.image),
               label: const Text(
-                'From Callery',
+                'From Gallery',
               ),
             ),
           ],
