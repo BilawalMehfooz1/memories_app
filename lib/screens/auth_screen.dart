@@ -1,7 +1,9 @@
 import 'dart:io';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
+import 'package:flutter/material.dart';
 import 'package:memories_app/widgets/auth_input_field.dart';
 import 'package:memories_app/widgets/user_image_picker.dart';
 
@@ -19,12 +21,15 @@ class _AuthScreenState extends State<AuthScreen> {
   var _enteredEmail = '';
   var _enteredPassword = '';
   var _enteredUserName = '';
+  var _confirmPassword = '';
   File? _selectedImage;
   var _isLogin = true;
+  var _isAuthenticating = false;
 
   void _submit() async {
     UserCredential userCredentials;
     final isValid = _form.currentState!.validate();
+
     if (!isValid) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -33,6 +38,7 @@ class _AuthScreenState extends State<AuthScreen> {
       );
       return;
     }
+
     if (!_isLogin && _selectedImage == null) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -45,7 +51,20 @@ class _AuthScreenState extends State<AuthScreen> {
 
     _form.currentState!.save();
 
+    if (!_isLogin && _enteredPassword != _confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Passwords do not match!'),
+        ),
+      );
+      return;
+    }
+
     try {
+      setState(() {
+        _isAuthenticating = true;
+      });
+
       if (_isLogin) {
         userCredentials = await _firebase.signInWithEmailAndPassword(
           email: _enteredEmail,
@@ -56,29 +75,44 @@ class _AuthScreenState extends State<AuthScreen> {
           email: _enteredEmail,
           password: _enteredPassword,
         );
+
         final storageRef = FirebaseStorage.instance
             .ref()
             .child('user_images')
             .child('${userCredentials.user!.uid}.jpg');
         await storageRef.putFile(_selectedImage!);
         final imageUrl = await storageRef.getDownloadURL();
-        print(imageUrl);
+
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredentials.user!.uid)
+            .set({
+          'username': _enteredUserName,
+          'email': _enteredEmail,
+          'image_url': imageUrl,
+        });
       }
     } on FirebaseAuthException catch (error) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            error.message ?? 'Authentication failed.',
+      if (mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              error.message ?? 'Authentication failed.',
+            ),
           ),
-        ),
-      );
+        );
+      }
+      setState(() {
+        _isAuthenticating = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context);
+
     return Scaffold(
       backgroundColor: Colors.grey[50],
       body: Center(
@@ -101,15 +135,14 @@ class _AuthScreenState extends State<AuthScreen> {
                                 'Memories',
                                 style: style.textTheme.titleLarge,
                               ),
-                              const SizedBox(height: 30),
-                              if (!_isLogin)
+                              if (!_isLogin) ...[
+                                const SizedBox(height: 20),
                                 UserImagePicker(
                                   onPickedImage: (pickedImage) {
                                     _selectedImage = pickedImage;
                                   },
                                 ),
-                              const SizedBox(height: 10),
-                              if (!_isLogin)
+                                const SizedBox(height: 20),
                                 AuthInput(
                                   onSaved: (newValue) {
                                     if (newValue == null) {
@@ -129,6 +162,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                     return null;
                                   },
                                 ),
+                              ],
                               const SizedBox(height: 15),
                               AuthInput(
                                 onSaved: (newValue) {
@@ -169,43 +203,69 @@ class _AuthScreenState extends State<AuthScreen> {
                                 },
                               ),
                               const SizedBox(height: 20),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      style.colorScheme.primaryContainer,
-                                  foregroundColor:
-                                      style.colorScheme.onPrimaryContainer,
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(15),
+                              if (!_isLogin) ...[
+                                AuthInput(
+                                  onSaved: (newValue) {
+                                    if (newValue == null) {
+                                      return;
+                                    }
+                                    _confirmPassword = newValue;
+                                  },
+                                  labelText: 'Confirm Password',
+                                  obsecureText: true,
+                                  keyboardType: TextInputType.text,
+                                  validator: (value) {
+                                    if (value == null ||
+                                        value != _enteredPassword) {
+                                      return 'Passwords do not match.';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 20),
+                              ],
+                              if (_isAuthenticating)
+                                const CircularProgressIndicator(),
+                              if (!_isAuthenticating)
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        style.colorScheme.primaryContainer,
+                                    foregroundColor:
+                                        style.colorScheme.onPrimaryContainer,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(15),
+                                      ),
+                                    ),
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 15,
+                                      horizontal:
+                                          (constraints.maxWidth - 70) / 2,
                                     ),
                                   ),
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: 15,
-                                    horizontal: (constraints.maxWidth - 70) / 2,
+                                  onPressed: _submit,
+                                  child: Text(
+                                    _isLogin ? 'Log in' : 'Sign up',
+                                    style: const TextStyle(fontSize: 17),
                                   ),
                                 ),
-                                onPressed: _submit,
-                                child: Text(
-                                  _isLogin ? 'Log in' : 'Sign up',
-                                  style: const TextStyle(fontSize: 17),
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _isLogin = !_isLogin;
-                                  });
-                                },
-                                child: Text(
-                                  _isLogin
-                                      ? 'Create an account'
-                                      : 'I already have an account',
-                                  style: TextStyle(
-                                    color: Colors.grey[800],
+                              if (!_isAuthenticating)
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _isLogin = !_isLogin;
+                                    });
+                                  },
+                                  child: Text(
+                                    _isLogin
+                                        ? 'Create an account'
+                                        : 'I already have an account',
+                                    style: TextStyle(
+                                      color: Colors.grey[800],
+                                    ),
                                   ),
                                 ),
-                              ),
                             ],
                           );
                         },

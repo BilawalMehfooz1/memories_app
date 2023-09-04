@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class AuthInput extends StatelessWidget {
+class AuthInput extends StatefulWidget {
   const AuthInput({
     super.key,
     required this.labelText,
@@ -9,18 +9,27 @@ class AuthInput extends StatelessWidget {
     required this.validator,
     required this.onSaved,
   });
+
   final bool obsecureText;
   final String labelText;
   final TextInputType keyboardType;
   final FormFieldValidator<String> validator;
   final FormFieldSetter<String> onSaved;
+
+  @override
+  State<AuthInput> createState() => _AuthInputState();
+}
+
+class _AuthInputState extends State<AuthInput> {
+  bool _isVisible = false;
+
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      keyboardType: keyboardType,
-      obscureText: obsecureText,
+      keyboardType: widget.keyboardType,
+      obscureText: widget.obsecureText && !_isVisible,
       decoration: InputDecoration(
-        labelText: labelText,
+        labelText: widget.labelText,
         labelStyle: const TextStyle(fontSize: 13),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
@@ -34,9 +43,20 @@ class AuthInput extends StatelessWidget {
           borderSide: const BorderSide(color: Colors.red),
           borderRadius: BorderRadius.circular(15),
         ),
+        suffixIcon: widget.obsecureText
+            ? IconButton(
+                icon:
+                    Icon(_isVisible ? Icons.visibility : Icons.visibility_off),
+                onPressed: () {
+                  setState(() {
+                    _isVisible = !_isVisible;
+                  });
+                },
+              )
+            : null,
       ),
-      onSaved: onSaved,
-      validator: validator,
+      onSaved: widget.onSaved,
+      validator: widget.validator,
     );
   }
 }
