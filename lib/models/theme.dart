@@ -8,18 +8,18 @@ final ThemeData lightTheme = ThemeData(
     primary: Color.fromRGBO(178, 5, 31, 1),
   ),
   scaffoldBackgroundColor: const Color.fromRGBO(255, 250, 240, 1.0),
-  // appBarTheme: AppBarTheme(
-  //   elevation: 0,
-  //   color: const Color.fromRGBO(255, 250, 240, 1.0),
-  //   titleTextStyle: GoogleFonts.euphoriaScript(
-  //     fontSize: 30.0,
-  //     color: Colors.black,
-  //     fontWeight: FontWeight.bold,
-  //   ),
-  // ),
+  appBarTheme: AppBarTheme(
+    elevation: 0,
+    color: const Color.fromRGBO(255, 250, 240, 1.0),
+    titleTextStyle: GoogleFonts.euphoriaScript(
+      fontSize: 35.0,
+      color: Colors.black,
+      fontWeight: FontWeight.bold,
+    ),
+  ),
   textTheme: GoogleFonts.montserratTextTheme().copyWith(
     titleLarge: GoogleFonts.euphoriaScript(
-      fontSize: 40.0, 
+      fontSize: 40.0,
       color: Colors.black,
       fontWeight: FontWeight.bold,
     ),

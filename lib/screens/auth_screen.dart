@@ -4,8 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import 'package:flutter/material.dart';
-import 'package:memories_app/widgets/auth_input_field.dart';
-import 'package:memories_app/widgets/user_image_picker.dart';
+import 'package:memories_app/widgets/auth_data/auth_input_field.dart';
+import 'package:memories_app/widgets/auth_data/user_image_picker.dart';
 
 final _firebase = FirebaseAuth.instance;
 
@@ -262,7 +262,8 @@ class _AuthScreenState extends State<AuthScreen> {
                                         ? 'Create an account'
                                         : 'I already have an account',
                                     style: TextStyle(
-                                      color: Colors.grey[800],
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
                                     ),
                                   ),
                                 ),
