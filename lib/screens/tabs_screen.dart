@@ -1,6 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:memories_app/screens/add_screen.dart';
+import 'package:memories_app/screens/add_memory_screen.dart';
 import 'package:memories_app/screens/favorites_screen.dart';
 import 'package:memories_app/screens/home_screen.dart';
 
@@ -13,14 +12,25 @@ class TabsScreen extends StatefulWidget {
 
 class _TabsScreenState extends State<TabsScreen> {
   var currentIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       const HomeScreen(),
-      const AddNewScreen(),
+      const AddNewMemoryScreen(),
       const FavoriteScreen(),
     ];
+
+    final List<String> titles = [
+      'Memories',
+      'Add New Memory',
+      'Favorite Memories',
+    ];
+
     return Scaffold(
+      appBar: AppBar(
+        title: Text(titles[currentIndex]),
+      ),
       body: pages[currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
