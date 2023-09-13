@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:memories_app/screens/add_memory_screen.dart';
 import 'package:memories_app/screens/favorites_screen.dart';
@@ -30,6 +31,14 @@ class _TabsScreenState extends State<TabsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(titles[currentIndex]),
+         actions: [
+            IconButton(
+              onPressed: () {
+                FirebaseAuth.instance.signOut();
+              },
+              icon: const Icon(Icons.exit_to_app),
+            )
+          ],
       ),
       body: pages[currentIndex],
       bottomNavigationBar: BottomNavigationBar(

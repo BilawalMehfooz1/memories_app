@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:memories_app/widgets/image_input.dart';
 
@@ -23,6 +24,13 @@ class _AddNewMemoryScreenState extends State<AddNewMemoryScreen> {
   }
 
   void _saveMemory() async {
+    // Ensure the user is authenticated
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      // Add logic to navigate to login or show a prompt
+      return;
+    }
+
     if (_titleController.text.trim().length < 4 ||
         _titleController.text.trim().isEmpty ||
         _titleController.text.isEmpty) {
@@ -48,7 +56,8 @@ class _AddNewMemoryScreenState extends State<AddNewMemoryScreen> {
       final ref = FirebaseStorage.instance
           .ref()
           .child('memories')
-          .child('${DateTime.now().toIso8601String()}.jpg');
+          // Improve image naming with user UID for uniqueness
+          .child('${DateTime.now().toIso8601String()}_${user.uid}.jpg');
 
       await ref.putFile(_selectedImage!);
 
@@ -58,27 +67,33 @@ class _AddNewMemoryScreenState extends State<AddNewMemoryScreen> {
       await FirebaseFirestore.instance.collection('memories').add({
         'title': _titleController.text,
         'imageUrl': imageUrl,
-        // Add other details like the date, etc. if necessary
+        'userID': user.uid,
       });
     } catch (error) {
+      String errorMessage;
       if (error is FirebaseException) {
-        if (!mounted) {
-          return;
+        // Mapping known errors to user-friendly messages
+        switch (error.code) {
+          case 'operation-not-allowed':
+            errorMessage = 'Saving memories is not allowed currently.';
+            break;
+          case 'user-not-found':
+            errorMessage = 'User not found.';
+            break;
+          // Add other cases as needed.
+          default:
+            errorMessage = error.message ?? 'An unknown error occurred.';
+            break;
         }
+      } else {
+        errorMessage = 'An error occurred. Please try again.';
+      }
+
+      if (mounted) {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(error.message!),
-          ),
-        );
-      } else {
-        if (!mounted) {
-          return;
-        }
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('An error occurred. Please try again.'),
+            content: Text(errorMessage),
           ),
         );
       }
@@ -103,11 +118,6 @@ class _AddNewMemoryScreenState extends State<AddNewMemoryScreen> {
               },
             ),
             const SizedBox(height: 10),
-            // LocationInput(
-            //   onSelectLocation: (location) {
-            //     _selectedLocation = location;
-            //   },
-            // ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _saveMemory,

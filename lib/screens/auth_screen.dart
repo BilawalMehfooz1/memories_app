@@ -51,6 +51,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
     _form.currentState!.save();
 
+    // Add this check for password and confirm password mismatch
     if (!_isLogin && _enteredPassword != _confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -60,11 +61,11 @@ class _AuthScreenState extends State<AuthScreen> {
       return;
     }
 
-    try {
-      setState(() {
-        _isAuthenticating = true;
-      });
+    setState(() {
+      _isAuthenticating = true;
+    });
 
+    try {
       if (_isLogin) {
         userCredentials = await _firebase.signInWithEmailAndPassword(
           email: _enteredEmail,
@@ -103,6 +104,7 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
         );
       }
+    } finally {
       setState(() {
         _isAuthenticating = false;
       });
