@@ -1,56 +1,39 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:memories_app/screens/add_memory_screen.dart';
-import 'package:memories_app/screens/favorites_screen.dart';
-import 'package:memories_app/screens/home_screen.dart';
+import 'package:memories_app/providers/tabscreen_provider.dart';
 
-class TabsScreen extends StatefulWidget {
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class TabsScreen extends ConsumerWidget {
   const TabsScreen({super.key});
 
   @override
-  State<TabsScreen> createState() => _TabsScreenState();
-}
-
-class _TabsScreenState extends State<TabsScreen> {
-  var currentIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> pages = [
-      const HomeScreen(),
-      const AddNewMemoryScreen(),
-      const FavoriteScreen(),
-    ];
-
-    final List<String> titles = [
-      'Memories',
-      'Add New Memory',
-      'Favorite Memories',
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final changeScreen = ref.watch(tabScreenProvider);
+    final currentScreenData =
+        ref.read(tabScreenProvider.notifier).currentScreenData(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(titles[currentIndex]),
-         actions: [
-            IconButton(
-              onPressed: () {
-                FirebaseAuth.instance.signOut();
-              },
-              icon: const Icon(Icons.exit_to_app),
-            )
-          ],
+        title: Text(currentScreenData.item2),
+        actions: [
+          IconButton(
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+            },
+            icon: const Icon(Icons.exit_to_app),
+          )
+        ],
       ),
-      body: pages[currentIndex],
+      body: currentScreenData.item1,
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
+        currentIndex: changeScreen,
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black,
         showSelectedLabels: false,
         showUnselectedLabels: false,
         onTap: (value) {
-          setState(() {
-            currentIndex = value;
-          });
+          ref.read(provider)
         },
         items: [
           BottomNavigationBarItem(
