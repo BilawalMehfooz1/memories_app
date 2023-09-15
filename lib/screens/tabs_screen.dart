@@ -33,7 +33,7 @@ class TabsScreen extends ConsumerWidget {
         showSelectedLabels: false,
         showUnselectedLabels: false,
         onTap: (value) {
-          ref.read(provider)
+          ref.read(tabScreenProvider.notifier).changeScreen(value);
         },
         items: [
           BottomNavigationBarItem(
@@ -41,7 +41,7 @@ class TabsScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  currentIndex == 0 ? Icons.home : Icons.home_outlined,
+                  changeScreen == 0 ? Icons.home : Icons.home_outlined,
                   size: 25,
                 ),
                 const Text(
@@ -55,7 +55,7 @@ class TabsScreen extends ConsumerWidget {
           BottomNavigationBarItem(
             icon: Center(
               child: Icon(
-                currentIndex == 1 ? Icons.add_circle : Icons.add_circle_outline,
+                changeScreen == 1 ? Icons.add_circle : Icons.add_circle_outline,
                 size: 45,
               ),
             ),
@@ -66,7 +66,7 @@ class TabsScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  currentIndex == 2 ? Icons.favorite : Icons.favorite_border,
+                  changeScreen == 2 ? Icons.favorite : Icons.favorite_border,
                   size: 25,
                 ),
                 const Text(

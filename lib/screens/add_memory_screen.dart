@@ -1,19 +1,21 @@
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:memories_app/widgets/image_input.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AddNewMemoryScreen extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:memories_app/providers/tabscreen_provider.dart';
+import 'package:memories_app/widgets/image_input.dart';
+
+class AddNewMemoryScreen extends ConsumerStatefulWidget {
   const AddNewMemoryScreen({super.key});
 
   @override
-  State<AddNewMemoryScreen> createState() => _AddNewMemoryScreenState();
+  ConsumerState<AddNewMemoryScreen> createState() => _AddNewMemoryScreenState();
 }
 
-class _AddNewMemoryScreenState extends State<AddNewMemoryScreen> {
+class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
   final _titleController = TextEditingController();
   File? _selectedImage;
 
@@ -27,7 +29,7 @@ class _AddNewMemoryScreenState extends State<AddNewMemoryScreen> {
     // Ensure the user is authenticated
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      // Add logic to navigate to login or show a prompt
+      //add logic to send user to login
       return;
     }
 
@@ -52,6 +54,7 @@ class _AddNewMemoryScreenState extends State<AddNewMemoryScreen> {
       );
       return;
     }
+    ref.read(tabScreenProvider.notifier).changeScreen(0);
     try {
       final ref = FirebaseStorage.instance
           .ref()
