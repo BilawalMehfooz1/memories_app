@@ -26,10 +26,9 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
   }
 
   void _saveMemory() async {
-    // Ensure the user is authenticated
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      //add logic to send user to login
+      Navigator.of(context).popUntil((route) => route.isFirst);
       return;
     }
 
