@@ -28,16 +28,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   void _submit() async {
     UserCredential userCredentials;
-    final isValid = _form.currentState!.validate();
-
-    if (!isValid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill the form correctly.'),
-        ),
-      );
-      return;
-    }
+   final isValid= _form.currentState!.validate();
 
     if (!_isLogin && _selectedImage == null) {
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -51,7 +42,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
     _form.currentState!.save();
 
-    // Add this check for password and confirm password mismatch
     if (!_isLogin && _enteredPassword != _confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
