@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -9,14 +10,46 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _initialDataFetched = false;
+
+  Widget _buildShimmerItem() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.grey[300],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('memories').snapshots(),
         builder: (ctx, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+          // Check if the initial data has been fetched.
+          if (!_initialDataFetched &&
+              snapshot.connectionState != ConnectionState.waiting) {
+            _initialDataFetched = true;
+          }
+
+          if (!_initialDataFetched ||
+              snapshot.connectionState == ConnectionState.waiting) {
+            // Display a shimmering grid
+            return GridView.builder(
+              padding: const EdgeInsets.all(10),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+              ),
+              itemCount: 6, // Displaying 6 shimmer items
+              itemBuilder: (context, index) => _buildShimmerItem(),
+            );
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
@@ -34,9 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
             itemCount: memories.length,
             itemBuilder: (context, index) {
               return InkWell(
-                onTap: () {
-                  // _onTapPlace(context, placesList[index]);
-                },
+                onTap: () {},
                 child: Card(
                   elevation: 5,
                   shape: RoundedRectangleBorder(
