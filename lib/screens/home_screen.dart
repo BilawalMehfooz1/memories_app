@@ -11,6 +11,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _initialDataFetched = false;
+  
 
   Widget _buildShimmerItem() {
     return Shimmer.fromColors(
@@ -29,7 +30,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('memories').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('memories')
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
         builder: (ctx, snapshot) {
           // Check if the initial data has been fetched.
           if (!_initialDataFetched &&

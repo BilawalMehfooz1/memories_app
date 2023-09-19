@@ -18,6 +18,7 @@ class AddNewMemoryScreen extends ConsumerStatefulWidget {
 class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
   final _titleController = TextEditingController();
   File? _selectedImage;
+  bool _isUploading = false;
 
   @override
   void dispose() {
@@ -26,6 +27,9 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
   }
 
   void _saveMemory() async {
+    setState(() {
+      _isUploading = true; // Mark the start of the upload process
+    });
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       Navigator.of(context).popUntil((route) => route.isFirst);
@@ -53,6 +57,9 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
       );
       return;
     }
+    setState(() {
+      _isUploading = true; // Mark the start of the upload process
+    });
     ref.read(tabScreenProvider.notifier).changeScreen(0);
     try {
       final ref = FirebaseStorage.instance
@@ -70,7 +77,9 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
         'title': _titleController.text,
         'imageUrl': imageUrl,
         'userID': user.uid,
+        'createdAt': Timestamp.now(),
       });
+      
     } catch (error) {
       String errorMessage;
       if (error is FirebaseException) {
@@ -120,12 +129,13 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
               },
             ),
             const SizedBox(height: 10),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _saveMemory,
-              icon: const Icon(Icons.add),
-              label: const Text('Add'),
-            )
+            _isUploading
+                ? const CircularProgressIndicator()
+                : ElevatedButton.icon(
+                    onPressed: _saveMemory,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add'),
+                  ),
           ],
         ),
       ),
