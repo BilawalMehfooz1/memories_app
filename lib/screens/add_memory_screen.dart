@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:memories_app/providers/tabscreen_provider.dart';
 import 'package:memories_app/widgets/image_input.dart';
+import 'package:memories_app/widgets/location_input.dart';
 
 class AddNewMemoryScreen extends ConsumerStatefulWidget {
   const AddNewMemoryScreen({super.key});
@@ -27,9 +28,6 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
   }
 
   void _saveMemory() async {
-    setState(() {
-      _isUploading = true; // Mark the start of the upload process
-    });
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       Navigator.of(context).popUntil((route) => route.isFirst);
@@ -79,7 +77,6 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
         'userID': user.uid,
         'createdAt': Timestamp.now(),
       });
-      
     } catch (error) {
       String errorMessage;
       if (error is FirebaseException) {
@@ -108,6 +105,10 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
           ),
         );
       }
+    } finally {
+      setState(() {
+        _isUploading = false;
+      });
     }
   }
 
@@ -128,6 +129,8 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
                 _selectedImage = image;
               },
             ),
+            const SizedBox(height: 10),
+            const LocationInput(),
             const SizedBox(height: 10),
             _isUploading
                 ? const CircularProgressIndicator()
