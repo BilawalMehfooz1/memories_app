@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter/material.dart';
+import 'package:memories_app/models/location.dart';
 import 'package:memories_app/providers/tabscreen_provider.dart';
 import 'package:memories_app/widgets/image_input.dart';
 import 'package:memories_app/widgets/location_input.dart';
@@ -20,6 +21,7 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
   final _titleController = TextEditingController();
   File? _selectedImage;
   bool _isUploading = false;
+  PlaceLocation? _selectedPlaceLocation;
 
   @override
   void dispose() {
@@ -55,6 +57,17 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
       );
       return;
     }
+
+    if (_selectedPlaceLocation == null) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a location.'),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isUploading = true; // Mark the start of the upload process
     });
@@ -76,6 +89,7 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
         'imageUrl': imageUrl,
         'userID': user.uid,
         'createdAt': Timestamp.now(),
+        'address': _selectedPlaceLocation?.address ?? '',
       });
     } catch (error) {
       String errorMessage;
@@ -130,7 +144,11 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
               },
             ),
             const SizedBox(height: 10),
-            const LocationInput(),
+            LocationInput(
+              onSaveLocation: (selectedLocation) {
+                _selectedPlaceLocation = selectedLocation;
+              },
+            ),
             const SizedBox(height: 10),
             _isUploading
                 ? const CircularProgressIndicator()
