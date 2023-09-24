@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-// import 'package:http/http.dart' as http;
+import 'package:http/http.dart' as http;
 import 'package:memories_app/models/location.dart';
 
 class LocationInput extends StatefulWidget {
@@ -51,13 +51,14 @@ class _LocationInputState extends State<LocationInput> {
     final lat = locationData.latitude;
     final lng = locationData.longitude;
 
+    final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=AIzaSyB-qF_ODijQOhNfpfI2IxmeIjYw0LeY5OE');
+    final response = await http.get(url);
     if (lat != null && lng != null) {
       setState(() {
         _pickedLocation = PlaceLocation(latitude: lat, longitude: lng);
         _isGettingLocation = false;
       });
-      print(lat);
-      print(lng);
       widget.onSaveLocation(_pickedLocation!);
     }
   }
