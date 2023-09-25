@@ -58,8 +58,8 @@ class _LocationInputState extends State<LocationInput> {
 
     final response = await http.get(url);
     final resData = json.decode(response.body);
-    final address = resData['result'][0]['formatted_address'];
-
+    final address = resData['results'][0]['formatted_address'];
+    print(address);
     if (lat != null && lng != null && address != null) {
       setState(() {
         _pickedLocation = PlaceLocation(
