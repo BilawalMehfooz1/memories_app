@@ -90,6 +90,8 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
         'userID': user.uid,
         'createdAt': Timestamp.now(),
         'address': _selectedPlaceLocation?.address ?? '',
+        'latitude': _selectedPlaceLocation?.latitude ?? '',
+        'longitude': _selectedPlaceLocation?.latitude ?? '',
       });
     } catch (error) {
       String errorMessage;

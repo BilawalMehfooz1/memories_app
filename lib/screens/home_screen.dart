@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memories_app/screens/memories_detail_screen.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -11,7 +12,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _initialDataFetched = false;
-  
 
   Widget _buildShimmerItem() {
     return Shimmer.fromColors(
@@ -71,7 +71,14 @@ class _HomeScreenState extends State<HomeScreen> {
             itemCount: memories.length,
             itemBuilder: (context, index) {
               return InkWell(
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          MemoryDetailsScreen(memoryId: memories[index].id),
+                    ),
+                  );
+                },
                 child: Card(
                   elevation: 5,
                   shape: RoundedRectangleBorder(
