@@ -99,6 +99,7 @@ class MemoryDetailsScreen extends StatelessWidget {
         },
       ),
       appBar: AppBar(
+        foregroundColor: Colors.white,
         backgroundColor: Colors.black,
         title: FutureBuilder<DocumentSnapshot>(
           future: fetchMemoryDetails(),
