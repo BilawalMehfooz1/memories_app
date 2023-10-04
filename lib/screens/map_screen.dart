@@ -5,7 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class MapScreen extends StatefulWidget {
   const MapScreen({
     super.key,
-    this.location =const PlaceLocation(
+    this.location = const PlaceLocation(
       latitude: 33.1496943,
       longitude: 73.7451016,
       address: 'Mirpur University of Science and Technology (MUST)',

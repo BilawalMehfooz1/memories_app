@@ -2,10 +2,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 import 'package:memories_app/models/location.dart';
+import 'package:memories_app/screens/map_screen.dart';
 
 class LocationInput extends StatefulWidget {
   final Function(PlaceLocation) onSaveLocation;
@@ -67,7 +69,6 @@ class _LocationInputState extends State<LocationInput> {
     final response = await http.get(url);
     final resData = json.decode(response.body);
     final address = resData['results'][0]['formatted_address'];
-    print(address);
     if (lat != null && lng != null && address != null) {
       setState(() {
         _pickedLocation = PlaceLocation(
@@ -124,8 +125,24 @@ class _LocationInputState extends State<LocationInput> {
               label: const Text('Get Current Location'),
             ),
             TextButton.icon(
-              onPressed: () {
-                // TODO: Implement the 'Select on Map' functionality
+              onPressed: () async {
+                final selectedLocation =
+                    await Navigator.of(context).push<LatLng>(
+                  MaterialPageRoute(
+                    builder: (ctx) => const MapScreen(isSelecting: true),
+                  ),
+                );
+
+                if (selectedLocation != null) {
+                  widget.onSaveLocation(
+                    PlaceLocation(
+                      latitude: selectedLocation.latitude,
+                      longitude: selectedLocation.longitude,
+                      address:
+                          "Obtained address using geocoding perhaps?", // This is a placeholder. You'd typically use geocoding.
+                    ),
+                  );
+                }
               },
               icon: const Icon(Icons.map),
               label: const Text('Select on Map'),
