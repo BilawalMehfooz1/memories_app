@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:flutter/material.dart';
 import 'package:memories_app/models/location.dart';
 import 'package:memories_app/providers/tabscreen_provider.dart';
@@ -11,7 +10,7 @@ import 'package:memories_app/widgets/image_input.dart';
 import 'package:memories_app/widgets/location_input.dart';
 
 class AddNewMemoryScreen extends ConsumerStatefulWidget {
-  const AddNewMemoryScreen({super.key});
+  const AddNewMemoryScreen({Key? key}) : super(key: key);
 
   @override
   ConsumerState<AddNewMemoryScreen> createState() => _AddNewMemoryScreenState();
@@ -42,7 +41,7 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Title should be atleast 4 characters.'),
+          content: Text('Title should be at least 4 characters.'),
         ),
       );
       return;
@@ -69,34 +68,31 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
     }
 
     setState(() {
-      _isUploading = true; // Mark the start of the upload process
+      _isUploading = true;
     });
     ref.read(tabScreenProvider.notifier).changeScreen(0);
     try {
       final ref = FirebaseStorage.instance
           .ref()
           .child('memories')
-          // Improve image naming with user UID for uniqueness
           .child('${DateTime.now().toIso8601String()}_${user.uid}.jpg');
 
       await ref.putFile(_selectedImage!);
-
       final imageUrl = await ref.getDownloadURL();
 
-      // Save the memory details to Firestore
       await FirebaseFirestore.instance.collection('memories').add({
         'title': _titleController.text,
         'imageUrl': imageUrl,
         'userID': user.uid,
         'createdAt': Timestamp.now(),
-        'address': _selectedPlaceLocation?.address ?? '',
-        'latitude': _selectedPlaceLocation?.latitude ?? '',
-        'longitude': _selectedPlaceLocation?.latitude ?? '',
+        'address': _selectedPlaceLocation!.address,
+        'latitude': _selectedPlaceLocation!.latitude,
+        'longitude': _selectedPlaceLocation!.longitude,
       });
     } catch (error) {
+      // Error handling
       String errorMessage;
       if (error is FirebaseException) {
-        // Mapping known errors to user-friendly messages
         switch (error.code) {
           case 'operation-not-allowed':
             errorMessage = 'Saving memories is not allowed currently.';
@@ -104,7 +100,6 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
           case 'user-not-found':
             errorMessage = 'User not found.';
             break;
-          // Add other cases as needed.
           default:
             errorMessage = error.message ?? 'An unknown error occurred.';
             break;

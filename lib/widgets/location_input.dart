@@ -1,9 +1,6 @@
-// import 'dart:convert';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-// import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 import 'package:memories_app/models/location.dart';
@@ -14,8 +11,8 @@ class LocationInput extends StatefulWidget {
 
   const LocationInput({
     required this.onSaveLocation,
-    super.key,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<LocationInput> createState() => _LocationInputState();
@@ -24,30 +21,27 @@ class LocationInput extends StatefulWidget {
 class _LocationInputState extends State<LocationInput> {
   PlaceLocation? _pickedLocation;
   var _isGettingLocation = false;
+
   String get locationImage {
     if (_pickedLocation == null) {
       return '';
     }
     final lat = _pickedLocation!.latitude;
     final lng = _pickedLocation!.longitude;
-    return 'https://maps.googleapis.com/maps/api/staticmap?center$lat,$lng=&zoom=16&size=600x300&maptype=roadmap&markers=color:red%7Clabel:A%7C$lat,$lng&key=AIzaSyB-qF_ODijQOhNfpfI2IxmeIjYw0LeY5OE';
+    return 'https://maps.googleapis.com/maps/api/staticmap?center=$lat,$lng&zoom=16&size=600x300&maptype=roadmap&markers=color:red%7Clabel:A%7C$lat,$lng&key=AIzaSyB-qF_ODijQOhNfpfI2IxmeIjYw0LeY5OE';
   }
 
   Future<void> _getCurrentLocation() async {
-    Location location = Location();
-
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
-    LocationData locationData;
-
-    serviceEnabled = await location.serviceEnabled();
+    final location = Location();
+    bool serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
       if (!serviceEnabled) {
         return;
       }
     }
-    permissionGranted = await location.hasPermission();
+
+    PermissionStatus permissionGranted = await location.hasPermission();
     if (permissionGranted == PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
       if (permissionGranted != PermissionStatus.granted) {
@@ -59,27 +53,28 @@ class _LocationInputState extends State<LocationInput> {
       _isGettingLocation = true;
     });
 
-    locationData = await location.getLocation();
-    final lat = locationData.latitude;
-    final lng = locationData.longitude;
+    final locationData = await location.getLocation();
+    _getAddressFromLatLng(
+      latitude: locationData.latitude!,
+      longitude: locationData.longitude!,
+    );
+  }
 
+  Future<void> _getAddressFromLatLng({required double latitude, required double longitude}) async {
     final url = Uri.parse(
-        'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=AIzaSyB-qF_ODijQOhNfpfI2IxmeIjYw0LeY5OE');
-
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&key=AIzaSyB-qF_ODijQOhNfpfI2IxmeIjYw0LeY5OE');
     final response = await http.get(url);
     final resData = json.decode(response.body);
     final address = resData['results'][0]['formatted_address'];
-    if (lat != null && lng != null && address != null) {
-      setState(() {
-        _pickedLocation = PlaceLocation(
-          latitude: lat,
-          longitude: lng,
-          address: address,
-        );
-        _isGettingLocation = false;
-      });
-      widget.onSaveLocation(_pickedLocation!);
-    }
+    setState(() {
+      _pickedLocation = PlaceLocation(
+        latitude: latitude,
+        longitude: longitude,
+        address: address,
+      );
+      _isGettingLocation = false;
+    });
+    widget.onSaveLocation(_pickedLocation!);
   }
 
   @override
@@ -91,9 +86,7 @@ class _LocationInputState extends State<LocationInput> {
 
     if (_isGettingLocation) {
       content = const CircularProgressIndicator();
-    }
-
-    if (_pickedLocation != null) {
+    } else if (_pickedLocation != null) {
       content = Image.network(
         locationImage,
         fit: BoxFit.cover,
@@ -132,15 +125,10 @@ class _LocationInputState extends State<LocationInput> {
                     builder: (ctx) => const MapScreen(isSelecting: true),
                   ),
                 );
-
                 if (selectedLocation != null) {
-                  widget.onSaveLocation(
-                    PlaceLocation(
-                      latitude: selectedLocation.latitude,
-                      longitude: selectedLocation.longitude,
-                      address:
-                          "Obtained address using geocoding perhaps?", // This is a placeholder. You'd typically use geocoding.
-                    ),
+                  _getAddressFromLatLng(
+                    latitude: selectedLocation.latitude,
+                    longitude: selectedLocation.longitude,
                   );
                 }
               },
@@ -148,7 +136,7 @@ class _LocationInputState extends State<LocationInput> {
               label: const Text('Select on Map'),
             ),
           ],
-        )
+        ),
       ],
     );
   }
