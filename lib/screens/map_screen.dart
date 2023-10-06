@@ -4,7 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class MapScreen extends StatefulWidget {
   const MapScreen({
     this.location,
-    this.isSelecting = true,
+    this.isSelecting=true,
     super.key,
   });
 

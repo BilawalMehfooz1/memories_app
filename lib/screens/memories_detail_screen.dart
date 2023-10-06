@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:memories_app/screens/map_screen.dart';
 
 class MemoryDetailsScreen extends StatelessWidget {
   const MemoryDetailsScreen({
@@ -69,7 +71,16 @@ class MemoryDetailsScreen extends StatelessWidget {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            // Handle map tap if needed
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return MapScreen(
+                                    isSelecting: false,
+                                    location: LatLng(lat, lng),
+                                  );
+                                },
+                              ),
+                            );
                           },
                           child: CircleAvatar(
                             radius: 70,
