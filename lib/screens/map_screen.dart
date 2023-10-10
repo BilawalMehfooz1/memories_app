@@ -8,7 +8,7 @@ class MapScreen extends StatefulWidget {
     super.key,
   });
 
-  final LatLng? locatio;
+  final LatLng? location;
   final bool isSelecting;
 
   @override
