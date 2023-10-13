@@ -26,6 +26,36 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _deleteMemory(String memoryId, BuildContext context) async {
+    bool? shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Delete Memory'),
+          content: const Text('Are you sure you want to delete this memory?'),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(ctx).pop(false);
+              },
+            ),
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () {
+                Navigator.of(ctx).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete != null && shouldDelete) {
+      FirebaseFirestore.instance.collection('memories').doc(memoryId).delete();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,6 +101,9 @@ class _HomeScreenState extends State<HomeScreen> {
             itemCount: memories.length,
             itemBuilder: (context, index) {
               return InkWell(
+                onLongPress: () {
+                  _deleteMemory(memories[index].id, context);
+                },
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
