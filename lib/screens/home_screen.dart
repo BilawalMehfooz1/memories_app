@@ -4,7 +4,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -12,6 +12,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _initialDataFetched = false;
+  Set<String> _selectedMemoryIds = Set<String>();
+  bool _showAppBar = true;
 
   Widget _buildShimmerItem() {
     return Shimmer.fromColors(
@@ -26,46 +28,60 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _deleteMemory(String memoryId, BuildContext context) async {
-    bool? shouldDelete = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text('Delete Memory'),
-          content: const Text('Are you sure you want to delete this memory?'),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(ctx).pop(false);
-              },
-            ),
-            TextButton(
-              child: const Text('Delete'),
-              onPressed: () {
-                Navigator.of(ctx).pop(true);
-              },
-            ),
-          ],
-        );
-      },
-    );
-
-    if (shouldDelete != null && shouldDelete) {
-      FirebaseFirestore.instance.collection('memories').doc(memoryId).delete();
+  void _deleteSelectedMemories() {
+    for (String id in _selectedMemoryIds) {
+      FirebaseFirestore.instance.collection('memories').doc(id).delete();
     }
+    setState(() {
+      _selectedMemoryIds.clear();
+      _showAppBar = true;
+    });
+  }
+
+  void _toggleMemorySelection(String memoryId) {
+    setState(() {
+      if (_selectedMemoryIds.contains(memoryId)) {
+        _selectedMemoryIds.remove(memoryId);
+      } else {
+        _selectedMemoryIds.add(memoryId);
+      }
+      _showAppBar = _selectedMemoryIds.isEmpty;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: _showAppBar
+          ? AppBar(
+              title: const Text('Memories'),
+            )
+          : AppBar(
+              title: Text('${_selectedMemoryIds.length} selected'),
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  setState(() {
+                    _selectedMemoryIds.clear();
+                    _showAppBar = true;
+                  });
+                },
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: _selectedMemoryIds.isEmpty
+                      ? null
+                      : () => _deleteSelectedMemories(),
+                ),
+              ],
+            ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('memories')
             .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (ctx, snapshot) {
-          // Check if the initial data has been fetched.
           if (!_initialDataFetched &&
               snapshot.connectionState != ConnectionState.waiting) {
             _initialDataFetched = true;
@@ -73,7 +89,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
           if (!_initialDataFetched ||
               snapshot.connectionState == ConnectionState.waiting) {
-            // Display a shimmering grid
             return GridView.builder(
               padding: const EdgeInsets.all(10),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -81,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
               ),
-              itemCount: 6, // Displaying 6 shimmer items
+              itemCount: 6,
               itemBuilder: (context, index) => _buildShimmerItem(),
             );
           }
@@ -100,17 +115,21 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             itemCount: memories.length,
             itemBuilder: (context, index) {
-              return InkWell(
+              return GestureDetector(
                 onLongPress: () {
-                  _deleteMemory(memories[index].id, context);
+                  _toggleMemorySelection(memories[index].id);
                 },
                 onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          MemoryDetailsScreen(memoryId: memories[index].id),
-                    ),
-                  );
+                  if (_selectedMemoryIds.isNotEmpty) {
+                    _toggleMemorySelection(memories[index].id);
+                  } else {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            MemoryDetailsScreen(memoryId: memories[index].id),
+                      ),
+                    );
+                  }
                 },
                 child: Card(
                   elevation: 5,
