@@ -12,8 +12,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _initialDataFetched = false;
-  Set<String> _selectedMemoryIds = Set<String>();
-  bool _showAppBar = true;
+  final Set<String> _selectedMemories = Set<String>();
+  bool _isSelecting = false;
 
   Widget _buildShimmerItem() {
     return Shimmer.fromColors(
@@ -28,157 +28,167 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _deleteSelectedMemories() {
-    for (String id in _selectedMemoryIds) {
-      FirebaseFirestore.instance.collection('memories').doc(id).delete();
-    }
+  void _toggleSelectMemory(String memoryId) {
     setState(() {
-      _selectedMemoryIds.clear();
-      _showAppBar = true;
+      if (_selectedMemories.contains(memoryId)) {
+        _selectedMemories.remove(memoryId);
+      } else {
+        _selectedMemories.add(memoryId);
+      }
+      _isSelecting = _selectedMemories.isNotEmpty;
     });
   }
 
-  void _toggleMemorySelection(String memoryId) {
+  void _selectAll(List<DocumentSnapshot> memories) {
     setState(() {
-      if (_selectedMemoryIds.contains(memoryId)) {
-        _selectedMemoryIds.remove(memoryId);
-      } else {
-        _selectedMemoryIds.add(memoryId);
-      }
-      _showAppBar = _selectedMemoryIds.isEmpty;
+      _selectedMemories.addAll(memories.map((e) => e.id));
+    });
+  }
+
+  void _unselectAll() {
+    setState(() {
+      _selectedMemories.clear();
+    });
+  }
+
+  void _deleteSelectedMemories() {
+    for (String memoryId in _selectedMemories) {
+      FirebaseFirestore.instance.collection('memories').doc(memoryId).delete();
+    }
+    setState(() {
+      _selectedMemories.clear();
+      _isSelecting = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _showAppBar
-          ? AppBar(
-              title: const Text('Memories'),
-            )
-          : AppBar(
-              title: Text('${_selectedMemoryIds.length} selected'),
-              leading: IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () {
-                  setState(() {
-                    _selectedMemoryIds.clear();
-                    _showAppBar = true;
-                  });
-                },
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: _selectedMemoryIds.isEmpty
-                      ? null
-                      : () => _deleteSelectedMemories(),
-                ),
-              ],
-            ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('memories')
-            .orderBy('createdAt', descending: true)
-            .snapshots(),
-        builder: (ctx, snapshot) {
-          if (!_initialDataFetched &&
-              snapshot.connectionState != ConnectionState.waiting) {
-            _initialDataFetched = true;
-          }
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('memories')
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (ctx, snapshot) {
+        if (!_initialDataFetched &&
+            snapshot.connectionState != ConnectionState.waiting) {
+          _initialDataFetched = true;
+        }
 
-          if (!_initialDataFetched ||
-              snapshot.connectionState == ConnectionState.waiting) {
-            return GridView.builder(
-              padding: const EdgeInsets.all(10),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemCount: 6,
-              itemBuilder: (context, index) => _buildShimmerItem(),
-            );
-          }
+        final memories = snapshot.data?.docs ?? [];
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No memories found.'));
-          }
-
-          final memories = snapshot.data!.docs;
-          return GridView.builder(
-            padding: const EdgeInsets.all(10),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemCount: memories.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onLongPress: () {
-                  _toggleMemorySelection(memories[index].id);
-                },
-                onTap: () {
-                  if (_selectedMemoryIds.isNotEmpty) {
-                    _toggleMemorySelection(memories[index].id);
-                  } else {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            MemoryDetailsScreen(memoryId: memories[index].id),
-                      ),
-                    );
-                  }
-                },
-                child: Card(
-                  elevation: 5,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(_isSelecting
+                ? '${_selectedMemories.length} selected'
+                : 'Memories'),
+            actions: _isSelecting
+                ? [
+                    IconButton(
+                      icon: const Icon(Icons.select_all),
+                      onPressed: () {
+                        if (_selectedMemories.length == memories.length) {
+                          _unselectAll();
+                        } else {
+                          _selectAll(memories);
+                        }
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: _deleteSelectedMemories,
+                    ),
+                  ]
+                : [],
+          ),
+          body: snapshot.connectionState == ConnectionState.waiting
+              ? GridView.builder(
+                  padding: const EdgeInsets.all(10),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Stack(
-                      children: [
-                        Image.network(
-                          memories[index]['imageUrl'],
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            color: Colors.black54,
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            child: Text(
-                              memories[index]['title'],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                shadows: [
-                                  Shadow(
-                                    blurRadius: 2.0,
-                                    color: Colors.black87,
-                                    offset: Offset(0.0, 1.0),
-                                  ),
-                                ],
-                              ),
+                  itemCount: 6,
+                  itemBuilder: (context, index) => _buildShimmerItem(),
+                )
+              : GridView.builder(
+                  padding: const EdgeInsets.all(10),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                  ),
+                  itemCount: memories.length,
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onLongPress: () {
+                        _toggleSelectMemory(memories[index].id);
+                      },
+                      onTap: () {
+                        if (_isSelecting) {
+                          _toggleSelectMemory(memories[index].id);
+                        } else {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => MemoryDetailsScreen(
+                                  memoryId: memories[index].id),
                             ),
+                          );
+                        }
+                      },
+                      child: Card(
+                        elevation: 5,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Stack(
+                            children: [
+                              Image.network(
+                                memories[index]['imageUrl'],
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                              ),
+                              if (_selectedMemories
+                                  .contains(memories[index].id))
+                                Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green[700],
+                                    size: 30.0,
+                                  ),
+                                ),
+                              Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  color: Colors.black54,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 5),
+                                  child: Text(
+                                    memories[index]['title'],
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          );
-        },
-      ),
+        );
+      },
     );
   }
 }

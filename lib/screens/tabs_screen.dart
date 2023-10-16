@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memories_app/providers/tabscreen_provider.dart';
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 class TabsScreen extends ConsumerWidget {
-  const TabsScreen({super.key});
+  const TabsScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -14,17 +12,6 @@ class TabsScreen extends ConsumerWidget {
         ref.read(tabScreenProvider.notifier).currentScreenData(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(currentScreenData.item2),
-        actions: [
-          IconButton(
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
-            },
-            icon: const Icon(Icons.exit_to_app),
-          )
-        ],
-      ),
       body: currentScreenData.item1,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: changeScreen,

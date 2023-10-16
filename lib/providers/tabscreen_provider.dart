@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:memories_app/screens/add_memory_screen.dart';
 import 'package:memories_app/screens/favorites_screen.dart';
@@ -13,14 +14,22 @@ class TabScreenNotifier extends StateNotifier<int> {
     state = index;
   }
 
-  Tuple2<Widget, String> currentScreenData(BuildContext context) {
+  Tuple3<Widget, String, List<Widget>> currentScreenData(BuildContext context) {
     switch (state) {
       case 1:
-        return const Tuple2(AddNewMemoryScreen(), 'Add new Memory');
+        return const Tuple3(AddNewMemoryScreen(), 'Add new Memory', []);
       case 2:
-        return const Tuple2(FavoriteScreen(), 'Favorite Memories');
+        return const Tuple3(FavoriteScreen(), 'Favorite Memories', []);
       default:
-        return const Tuple2(HomeScreen(), 'Memories');
+        List<Widget> homeActions = [
+          IconButton(
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+            },
+            icon: const Icon(Icons.exit_to_app),
+          ),
+        ];
+        return Tuple3(const HomeScreen(), 'Memories', homeActions);
     }
   }
 }
