@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:memories_app/screens/memories_detail_screen.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:shimmer/shimmer.dart';
+import 'package:flutter/material.dart';
 import 'package:memories_app/providers/selection_notifier.dart';
+import 'package:memories_app/screens/memories_detail_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});

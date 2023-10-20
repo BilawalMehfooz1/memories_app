@@ -1,10 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:memories_app/screens/add_memory_screen.dart';
-import 'package:memories_app/screens/favorites_screen.dart';
-import 'package:memories_app/screens/home_screen.dart';
 import 'package:tuple/tuple.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:memories_app/screens/home_screen.dart';
+import 'package:memories_app/screens/favorites_screen.dart';
+import 'package:memories_app/screens/add_memory_screen.dart';
 
 class TabScreenNotifier extends StateNotifier<int> {
   TabScreenNotifier() : super(0);
@@ -36,4 +37,3 @@ class TabScreenNotifier extends StateNotifier<int> {
 final tabScreenProvider = StateNotifierProvider<TabScreenNotifier, int>(
   (ref) => TabScreenNotifier(),
 );
-

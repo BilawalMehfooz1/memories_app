@@ -3,11 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:flutter/material.dart';
 import 'package:memories_app/models/location.dart';
-import 'package:memories_app/providers/tabscreen_provider.dart';
 import 'package:memories_app/widgets/image_input.dart';
 import 'package:memories_app/widgets/location_input.dart';
+import 'package:memories_app/providers/tabscreen_provider.dart';
 
 class AddNewMemoryScreen extends ConsumerStatefulWidget {
   const AddNewMemoryScreen({Key? key}) : super(key: key);
