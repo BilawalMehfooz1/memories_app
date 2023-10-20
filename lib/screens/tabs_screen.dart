@@ -8,11 +8,11 @@ class TabsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectionNotifier = ref.watch(selectionNotifierProvider);
+    final allMemoryIds = ref.watch(memoryIdsProvider);
     final currentTabIndex = ref.watch(tabScreenProvider);
+    final selectionNotifier = ref.watch(selectionNotifierProvider);
     final currentScreenData =
         ref.read(tabScreenProvider.notifier).currentScreenData(context);
-
     return Scaffold(
       appBar: selectionNotifier.isSelecting
           ? AppBar(
@@ -20,8 +20,25 @@ class TabsScreen extends ConsumerWidget {
                   Text('${selectionNotifier.selectedMemories.length} selected'),
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.cancel),
-                  onPressed: () => selectionNotifier.clearSelection(),
+                  icon: const Icon(Icons.checklist),
+                  onPressed: () {
+                    allMemoryIds.when(
+                      data: (dataList) {
+                        selectionNotifier.toggleSelectAll(dataList);
+                      },
+                      loading: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Fetching data... Please wait.')),
+                        );
+                      },
+                      error: (error, stack) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('An error occurred: $error')),
+                        );
+                      },
+                    );
+                  },
                 ),
               ],
             )

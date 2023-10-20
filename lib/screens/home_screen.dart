@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memories_app/providers/selection_notifier.dart';
 
 class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key}) ;
+  const HomeScreen({super.key});
 
   Widget _buildShimmerItem() {
     return Shimmer.fromColors(
@@ -24,6 +24,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectionNotifier = ref.watch(selectionNotifierProvider);
+    
 
     void deleteSelectedMemories() async {
       for (String memoryId in selectionNotifier.selectedMemories) {
