@@ -24,7 +24,6 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectionNotifier = ref.watch(selectionNotifierProvider);
-    
 
     void deleteSelectedMemories() async {
       for (String memoryId in selectionNotifier.selectedMemories) {
@@ -157,33 +156,25 @@ class HomeScreen extends ConsumerWidget {
                       bottom: 0,
                       left: 0,
                       right: 0,
-                      child: Container(
-                        width: double.infinity,
-                        height: 60,
-                        color: Colors.red,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.checklist,
-                                  color: Colors.white),
-                              onPressed: () {
-                                if (snapshot.data != null) {
-                                  selectAllMemories(snapshot.data!.docs);
-                                }
-                              },
+                      child: Center(
+                        child: Container(
+                          width: double.infinity,
+                          height: 60,
+                          color: Colors.white,
+                          child: Center(
+                            child: Container(
+                              width: 100,
+                              color: Colors.transparent,
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.black,
+                                  size: 35,
+                                ),
+                                onPressed: deleteSelectedMemories,
+                              ),
                             ),
-                            IconButton(
-                              icon:
-                                  const Icon(Icons.delete, color: Colors.white),
-                              onPressed: deleteSelectedMemories,
-                            ),
-                            IconButton(
-                              icon:
-                                  const Icon(Icons.clear, color: Colors.white),
-                              onPressed: selectionNotifier.clearSelection,
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     )
