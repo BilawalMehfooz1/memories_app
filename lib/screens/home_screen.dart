@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memories_app/providers/selection_notifier.dart';
 
 class HomeScreen extends ConsumerWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key}) ;
 
   Widget _buildShimmerItem() {
     return Shimmer.fromColors(

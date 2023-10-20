@@ -43,7 +43,7 @@ class TabsScreen extends ConsumerWidget {
                 BottomNavigationBarItem(
                   icon: Icon(
                     currentTabIndex == 0 ? Icons.home : Icons.home_outlined,
-                    size: 25,
+                    size: 28,
                   ),
                   label: 'Home',
                 ),
@@ -52,7 +52,7 @@ class TabsScreen extends ConsumerWidget {
                     currentTabIndex == 1
                         ? Icons.add_circle
                         : Icons.add_circle_outline,
-                    size: 25,
+                    size: 35,
                   ),
                   label: 'Add',
                 ),
@@ -61,7 +61,7 @@ class TabsScreen extends ConsumerWidget {
                     currentTabIndex == 2
                         ? Icons.favorite
                         : Icons.favorite_border,
-                    size: 25,
+                    size: 28,
                   ),
                   label: 'Favorites',
                 ),
