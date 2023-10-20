@@ -18,6 +18,13 @@ class TabsScreen extends ConsumerWidget {
           ? AppBar(
               title:
                   Text('${selectionNotifier.selectedMemories.length} selected'),
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  // Resetting the selection mode by clearing selected items
+                  selectionNotifier.deSelectAll();
+                },
+              ),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.checklist),

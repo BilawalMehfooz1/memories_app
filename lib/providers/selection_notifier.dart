@@ -37,6 +37,12 @@ class SelectionNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void deSelectAll() {
+    _selectedMemories.clear();
+    _forceSelecting = false;
+    notifyListeners();
+  }
+
   void selectAll(List<String> memoryIds) {
     _selectedMemories.addAll(memoryIds);
     _forceSelecting = false; // Resetting the flag since all items are selected
