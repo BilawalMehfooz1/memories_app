@@ -29,7 +29,7 @@ class FavoriteScreen extends ConsumerWidget {
       for (String memoryId in selectionNotifier.selectedMemories) {
         await FirebaseFirestore.instance
             .collection('memories')
-            .doc(memoryId)
+            .doc(memoryId
             .delete();
       }
       selectionNotifier.clearSelection();
