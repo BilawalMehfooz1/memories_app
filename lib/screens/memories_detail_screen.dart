@@ -62,10 +62,22 @@ class _MemoryDetailsScreenState extends State<MemoryDetailsScreen> {
     if (currentStatus == null) return;
 
     try {
-      await FirebaseFirestore.instance
-          .collection('memories')
-          .doc(widget.memoryId)
-          .update({'isFavorite': !currentStatus});
+      if (currentStatus) {
+        // If currently favorited, simply remove from favorites without setting timestamp
+        await FirebaseFirestore.instance
+            .collection('memories')
+            .doc(widget.memoryId)
+            .update({'isFavorite': !currentStatus, 'favoritedAt': FieldValue.delete()}); // Notice the FieldValue.delete() here
+      } else {
+        // If not favorited, mark as favorite and set the favoritedAt timestamp
+        await FirebaseFirestore.instance
+            .collection('memories')
+            .doc(widget.memoryId)
+            .update({
+              'isFavorite': !currentStatus,
+              'favoritedAt': Timestamp.now()  // Setting the timestamp here
+            });
+      }
       if (!mounted) {
         return;
       }
@@ -88,7 +100,8 @@ class _MemoryDetailsScreenState extends State<MemoryDetailsScreen> {
         ),
       );
     }
-  }
+}
+
 
   @override
   Widget build(BuildContext context) {
