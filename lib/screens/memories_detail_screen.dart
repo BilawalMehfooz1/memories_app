@@ -13,172 +13,165 @@ class MemoryDetailsScreen extends StatefulWidget {
   final String memoryId;
 
   @override
-  State<MemoryDetailsScreen> createState() => _MemoryDetailsScreenState();
+  _MemoryDetailsScreenState createState() => _MemoryDetailsScreenState();
 }
 
 class _MemoryDetailsScreenState extends State<MemoryDetailsScreen> {
   bool? isFavorite;
+  Map<String, dynamic>? memoryData;
 
-  Future<DocumentSnapshot> fetchMemoryDetails() {
-    return FirebaseFirestore.instance
-        .collection('memories')
-        .doc(widget.memoryId)
-        .get();
+  @override
+  void initState() {
+    super.initState();
+    _fetchMemoryDetails();
+  }
+
+  Future<void> _fetchMemoryDetails() async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('memories')
+          .doc(widget.memoryId)
+          .get();
+      if (doc.exists) {
+        setState(() {
+          memoryData = doc.data() as Map<String, dynamic>;
+          isFavorite = memoryData!['isFavorite'] ?? false;
+        });
+      }
+    } catch (error) {
+      // Handle potential errors here
+    }
   }
 
   Future<void> toggleFavoriteStatus() async {
     final currentStatus = isFavorite;
     if (currentStatus == null) return;
 
-    await FirebaseFirestore.instance
-        .collection('memories')
-        .doc(widget.memoryId)
-        .update({'isFavorite': !currentStatus});
-    if (!mounted) {
-      return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(currentStatus
-            ? 'Removed from favorites.'
-            : 'Marked as favorite.')));
+    try {
+      await FirebaseFirestore.instance
+          .collection('memories')
+          .doc(widget.memoryId)
+          .update({'isFavorite': !currentStatus});
 
-    setState(() {
-      isFavorite = !currentStatus;
-    });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(currentStatus
+              ? 'Removed from favorites.'
+              : 'Marked as favorite.'),
+        ),
+      );
+
+      setState(() {
+        isFavorite = !currentStatus;
+      });
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              'Failed to mark as favorite. Please check your internet connection.'),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context);
+
+    if (memoryData == null) {
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    final lat = memoryData!['latitude'] as double;
+    final lng = memoryData!['longitude'] as double;
+    final locationImage =
+        'https://maps.googleapis.com/maps/api/staticmap?center=$lat,$lng&zoom=16&size=600x300&maptype=roadmap&markers=color:red%7Clabel:A%7C$lat,$lng&key=AIzaSyB-qF_ODijQOhNfpfI2IxmeIjYw0LeY5OE';
+
     return Scaffold(
-      body: FutureBuilder<DocumentSnapshot>(
-        future: fetchMemoryDetails(),
-        builder: (ctx, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(child: Text('Memory not found.'));
-          }
-
-          final memoryData = snapshot.data!.data() as Map<String, dynamic>;
-          final lat = memoryData['latitude'] as double;
-          final lng = memoryData['longitude'] as double;
-          final locationImage =
-              'https://maps.googleapis.com/maps/api/staticmap?center=$lat,$lng&zoom=16&size=600x300&maptype=roadmap&markers=color:red%7Clabel:A%7C$lat,$lng&key=AIzaSyB-qF_ODijQOhNfpfI2IxmeIjYw0LeY5OE';
-
-          return Container(
-            decoration: const BoxDecoration(color: Colors.black),
-            child: Stack(
-              children: [
-                Image.network(
-                  memoryData['imageUrl'],
-                  fit: BoxFit.contain,
-                  height: double.infinity,
-                  width: double.infinity,
-                ),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          Colors.black45,
-                          Colors.black87,
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return MapScreen(
-                                    isSelecting: false,
-                                    location: LatLng(lat, lng),
-                                  );
-                                },
-                              ),
-                            );
-                          },
-                          child: CircleAvatar(
-                            radius: 70,
-                            backgroundImage: NetworkImage(locationImage),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 16,
-                            horizontal: 24,
-                          ),
-                          child: Text(
-                            memoryData['address'],
-                            textAlign: TextAlign.center,
-                            style: style.textTheme.titleMedium!.copyWith(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+      body: Container(
+        decoration: const BoxDecoration(color: Colors.black),
+        child: Stack(
+          children: [
+            Image.network(
+              memoryData!['imageUrl'],
+              fit: BoxFit.contain,
+              height: double.infinity,
+              width: double.infinity,
+            ),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.transparent,
+                      Colors.black45,
+                      Colors.black87,
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                   ),
                 ),
-              ],
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return MapScreen(
+                                isSelecting: false,
+                                location: LatLng(lat, lng),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                      child: CircleAvatar(
+                        radius: 70,
+                        backgroundImage: NetworkImage(locationImage),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 24,
+                      ),
+                      child: Text(
+                        memoryData!['address'],
+                        textAlign: TextAlign.center,
+                        style: style.textTheme.titleMedium!.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          );
-        },
+          ],
+        ),
       ),
       appBar: AppBar(
         foregroundColor: Colors.white,
         backgroundColor: Colors.black,
-        title: FutureBuilder<DocumentSnapshot>(
-          future: fetchMemoryDetails(),
-          builder: (ctx, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
-            }
-            if (!snapshot.hasData || !snapshot.data!.exists) {
-              return const Text('Memory not found.');
-            }
-
-            final memoryData = snapshot.data!.data() as Map<String, dynamic>;
-            return Text(
-              memoryData['title'],
-              style: const TextStyle(color: Colors.white),
-            );
-          },
+        title: Text(
+          memoryData!['title'],
+          style: const TextStyle(color: Colors.white),
         ),
         actions: [
-          FutureBuilder<DocumentSnapshot>(
-            future: fetchMemoryDetails(),
-            builder: (ctx, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Container(); // Display an empty container while loading
-              }
-              if (!snapshot.hasData || !snapshot.data!.exists) {
-                return Container(); // Display an empty container for no data
-              }
-
-              final memoryData = snapshot.data!.data() as Map<String, dynamic>;
-              if (isFavorite == null) {
-                isFavorite = memoryData['isFavorite'] ?? false;
-              }
-
-              return IconButton(
-                icon: Icon(
-                  isFavorite! ? Icons.favorite : Icons.favorite_border,
-                  color: Colors.white,
-                ),
-                onPressed: toggleFavoriteStatus,
-              );
-            },
+          IconButton(
+            icon: Icon(
+              isFavorite! ? Icons.favorite : Icons.favorite_border,
+              color: Colors.white,
+            ),
+            onPressed: toggleFavoriteStatus,
           ),
         ],
       ),
