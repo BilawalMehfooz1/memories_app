@@ -13,7 +13,7 @@ class MemoryDetailsScreen extends StatefulWidget {
   final String memoryId;
 
   @override
-  _MemoryDetailsScreenState createState() => _MemoryDetailsScreenState();
+  State<MemoryDetailsScreen> createState() => _MemoryDetailsScreenState();
 }
 
 class _MemoryDetailsScreenState extends State<MemoryDetailsScreen> {
@@ -32,6 +32,7 @@ class _MemoryDetailsScreenState extends State<MemoryDetailsScreen> {
           .collection('memories')
           .doc(widget.memoryId)
           .get();
+
       if (doc.exists) {
         setState(() {
           memoryData = doc.data() as Map<String, dynamic>;
@@ -39,7 +40,20 @@ class _MemoryDetailsScreenState extends State<MemoryDetailsScreen> {
         });
       }
     } catch (error) {
-      // Handle potential errors here
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Failed to fetch memory details. Please try again.",
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: Colors.black,
+        ),
+      );
     }
   }
 
@@ -52,7 +66,9 @@ class _MemoryDetailsScreenState extends State<MemoryDetailsScreen> {
           .collection('memories')
           .doc(widget.memoryId)
           .update({'isFavorite': !currentStatus});
-
+      if (!mounted) {
+        return;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(currentStatus
@@ -66,7 +82,7 @@ class _MemoryDetailsScreenState extends State<MemoryDetailsScreen> {
       });
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
               'Failed to mark as favorite. Please check your internet connection.'),
         ),
@@ -79,7 +95,7 @@ class _MemoryDetailsScreenState extends State<MemoryDetailsScreen> {
     final style = Theme.of(context);
 
     if (memoryData == null) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
         ),

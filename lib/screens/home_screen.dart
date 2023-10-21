@@ -36,11 +36,11 @@ class HomeScreen extends ConsumerWidget {
       selectionNotifier.clearSelection();
     }
 
-    void selectAllMemories(List<DocumentSnapshot> memories) {
-      memories.forEach((memory) {
-        selectionNotifier.toggleMemorySelection(memory.id);
-      });
-    }
+//     void selectAllMemories(List<DocumentSnapshot> memories) {
+//   for (var memory in memories) {
+//     selectionNotifier.toggleMemorySelection(memory.id);
+//   }
+// }
 
     return Column(
       children: [
