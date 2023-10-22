@@ -1,10 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'package:shimmer/shimmer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:memories_app/providers/selection_notifier.dart';
 import 'package:memories_app/screens/memories_detail_screen.dart';
+
+enum MemoryFilter {
+  All,
+  Old,
+  MonthYear,
+}
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -25,31 +30,75 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectionNotifier = ref.watch(selectionNotifierProvider);
+    final filterNotifier = useState<MemoryFilter>(MemoryFilter.All);
+    final monthYearNotifier = useState<DateTime?>(null);
 
     void deleteSelectedMemories() async {
       for (String memoryId in selectionNotifier.selectedMemories) {
-        await FirebaseFirestore.instance
-            .collection('memories')
-            .doc(memoryId)
-            .delete();
+        await FirebaseFirestore.instance.collection('memories').doc(memoryId).delete();
       }
       selectionNotifier.clearSelection();
     }
 
-//     void selectAllMemories(List<DocumentSnapshot> memories) {
-//   for (var memory in memories) {
-//     selectionNotifier.toggleMemorySelection(memory.id);
-//   }
-// }
+    Stream<QuerySnapshot> getMemoriesStream() {
+      final query = FirebaseFirestore.instance.collection('memories');
+
+      switch (filterNotifier.value) {
+        case MemoryFilter.All:
+          return query.orderBy('createdAt', descending: true).snapshots();
+        case MemoryFilter.Old:
+          final lastYear = DateTime.now().subtract(Duration(days: 365));
+          return query.where('createdAt', isLessThanOrEqualTo: lastYear).orderBy('createdAt').snapshots();
+        case MemoryFilter.MonthYear:
+          if (monthYearNotifier.value == null) {
+            return query.snapshots(); // Default to all if no month/year is specified.
+          }
+          final start = DateTime(monthYearNotifier.value!.year, monthYearNotifier.value!.month);
+          final end = DateTime(monthYearNotifier.value!.year, monthYearNotifier.value!.month + 1);
+          return query.where('createdAt', isGreaterThanOrEqualTo: start).where('createdAt', isLessThan: end).orderBy('createdAt').snapshots();
+        default:
+          return query.snapshots();
+      }
+    }
 
     return Column(
       children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _filterOption('All', MemoryFilter.All, filterNotifier),
+            _filterOption('Old', MemoryFilter.Old, filterNotifier),
+            DropdownButton<MemoryFilter>(
+              value: filterNotifier.value,
+              onChanged: (MemoryFilter? newValue) {
+                if (newValue == MemoryFilter.MonthYear) {
+                  showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now(),
+                  ).then((pickedDate) {
+                    if (pickedDate != null) {
+                      monthYearNotifier.value = pickedDate;
+                      filterNotifier.value = newValue!;
+                    }
+                  });
+                } else {
+                  filterNotifier.value = newValue!;
+                }
+              },
+              items: <DropdownMenuItem<MemoryFilter>>[
+                DropdownMenuItem<MemoryFilter>(
+                  value: MemoryFilter.MonthYear,
+                  child: Text('Select Month & Year'),
+                ),
+              ],
+            ),
+          ],
+        ),
         Expanded(
           child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('memories')
-                .orderBy('createdAt', descending: true)
-                .snapshots(),
+            stream: getMemoriesStream(),
             builder: (ctx, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return GridView.builder(
@@ -74,8 +123,7 @@ class HomeScreen extends ConsumerWidget {
                 children: [
                   GridView.builder(
                     padding: const EdgeInsets.all(10),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 10,
                       mainAxisSpacing: 10,
@@ -83,10 +131,8 @@ class HomeScreen extends ConsumerWidget {
                     itemCount: memories.length,
                     itemBuilder: (context, index) {
                       final memory = memories[index];
-                      final isSelected = selectionNotifier.selectedMemories
-                          .contains(memory.id);
-
-                      return InkWell(
+                      final isSelected = selectionNotifier.selectedMemories.contains(memory.id);
+return InkWell(
                         onTap: () {
                           if (selectionNotifier.isSelecting) {
                             selectionNotifier.toggleMemorySelection(memory.id);
@@ -180,11 +226,27 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     )
                 ],
+              
               );
             },
           ),
         ),
       ],
+    );
+  }
+
+  Widget _filterOption(String title, MemoryFilter option, ValueNotifier<MemoryFilter> notifier) {
+    return GestureDetector(
+      onTap: () {
+        notifier.value = option;
+      },
+      child: Text(
+        title,
+        style: TextStyle(
+          color: notifier.value == option ? Colors.blue : Colors.black,
+          fontWeight: notifier.value == option ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
     );
   }
 }
