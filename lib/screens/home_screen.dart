@@ -1,13 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'package:shimmer/shimmer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:memories_app/providers/selection_notifier.dart';
 import 'package:memories_app/screens/memories_detail_screen.dart';
 
-class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key});
+enum MemoryFilter { all, newest, oldest, monthYear }
+
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  MemoryFilter _selectedFilter = MemoryFilter.all;
+  DateTime? _selectedMonthYear;
 
   Widget _buildShimmerItem() {
     return Shimmer.fromColors(
@@ -23,7 +32,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final selectionNotifier = ref.watch(selectionNotifierProvider);
 
     void deleteSelectedMemories() async {
@@ -36,20 +45,60 @@ class HomeScreen extends ConsumerWidget {
       selectionNotifier.clearSelection();
     }
 
-//     void selectAllMemories(List<DocumentSnapshot> memories) {
-//   for (var memory in memories) {
-//     selectionNotifier.toggleMemorySelection(memory.id);
-//   }
-// }
+    Stream<QuerySnapshot> getMemoriesStream() {
+      final query = FirebaseFirestore.instance.collection('memories');
+      switch (_selectedFilter) {
+        case MemoryFilter.all:
+          return query.snapshots();
+        case MemoryFilter.newest:
+          return query.orderBy('createdAt', descending: true).snapshots();
+        case MemoryFilter.oldest:
+          return query.orderBy('createdAt', descending: false).snapshots();
+        case MemoryFilter.monthYear:
+          final start =
+              DateTime(_selectedMonthYear!.year, _selectedMonthYear!.month);
+          final end =
+              DateTime(_selectedMonthYear!.year, _selectedMonthYear!.month + 1);
+          return query
+              .where('createdAt', isGreaterThanOrEqualTo: start)
+              .where('createdAt', isLessThan: end)
+              .snapshots();
+      }
+    }
 
     return Column(
       children: [
+        Container(
+          color: Colors.black,
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _filterButton('All', MemoryFilter.all),
+              _filterButton('Newest', MemoryFilter.newest),
+              _filterButton('Oldest', MemoryFilter.oldest),
+              _filterButton('Month & Year', MemoryFilter.monthYear,
+                  additionalLogic: () {
+                showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime.now(),
+                ).then((pickedDate) {
+                  if (pickedDate != null) {
+                    setState(() {
+                      _selectedMonthYear = pickedDate;
+                      _selectedFilter = MemoryFilter.monthYear;
+                    });
+                  }
+                });
+              }),
+            ],
+          ),
+        ),
         Expanded(
           child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('memories')
-                .orderBy('createdAt', descending: true)
-                .snapshots(),
+            stream: getMemoriesStream(),
             builder: (ctx, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return GridView.builder(
@@ -185,6 +234,26 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _filterButton(String label, MemoryFilter filter,
+      {VoidCallback? additionalLogic}) {
+    return TextButton(
+      onPressed: () {
+        setState(() {
+          _selectedFilter = filter;
+        });
+        if (additionalLogic != null) additionalLogic();
+      },
+      child: Text(
+        label,
+        style: TextStyle(
+          color: _selectedFilter == filter ? Colors.white : Colors.white54,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }
