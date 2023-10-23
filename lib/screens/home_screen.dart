@@ -16,7 +16,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   MemoryFilter _selectedFilter = MemoryFilter.all;
-  DateTime? _selectedMonthYear;
+  DateTime? _selectedMonthYear = DateTime.now();
 
   Widget _buildShimmerItem() {
     return Shimmer.fromColors(
@@ -239,7 +239,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _filterButton(String label, MemoryFilter filter,
       {VoidCallback? additionalLogic}) {
-    return TextButton(
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: _selectedFilter == filter ? Colors.white : Colors.grey[300],
+        onPrimary: _selectedFilter == filter ? Colors.black : Colors.black54,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        elevation: _selectedFilter == filter ? 4 : 0,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
       onPressed: () {
         setState(() {
           _selectedFilter = filter;
@@ -248,8 +257,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       },
       child: Text(
         label,
-        style: TextStyle(
-          color: _selectedFilter == filter ? Colors.white : Colors.white54,
+        style: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
         ),
