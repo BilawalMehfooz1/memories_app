@@ -6,7 +6,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:memories_app/providers/selection_notifier.dart';
 import 'package:memories_app/screens/memories_detail_screen.dart';
 
-enum MemoryFilter { all, newest, oldest, monthYear }
+enum MemoryFilter { all, oldest, monthYear }
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -18,29 +18,29 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   MemoryFilter _selectedFilter = MemoryFilter.all;
   DateTime? _selectedMonthYear = DateTime.now();
-  final ScrollController _scrollController = ScrollController();
-  bool _showFilter = true;
+  // final ScrollController _scrollController = ScrollController();
+  // bool _showFilter = true;
 
-  @override
-  void initState() {
-    super.initState();
+  // @override
+  // void initState() {
+  //   super.initState();
 
-    _scrollController.addListener(() {
-      if (_scrollController.position.userScrollDirection ==
-              ScrollDirection.reverse &&
-          _showFilter) {
-        setState(() {
-          _showFilter = false;
-        });
-      } else if (_scrollController.position.userScrollDirection ==
-              ScrollDirection.forward &&
-          !_showFilter) {
-        setState(() {
-          _showFilter = true;
-        });
-      }
-    });
-  }
+  //   _scrollController.addListener(() {
+  //     if (_scrollController.position.userScrollDirection ==
+  //             ScrollDirection.reverse &&
+  //         _showFilter) {
+  //       setState(() {
+  //         _showFilter = false;
+  //       });
+  //     } else if (_scrollController.position.userScrollDirection ==
+  //             ScrollDirection.forward &&
+  //         !_showFilter) {
+  //       setState(() {
+  //         _showFilter = true;
+  //       });
+  //     }
+  //   });
+  // }
 
   Widget _buildShimmerItem() {
     return Shimmer.fromColors(
@@ -73,8 +73,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final query = FirebaseFirestore.instance.collection('memories');
       switch (_selectedFilter) {
         case MemoryFilter.all:
-          return query.snapshots();
-        case MemoryFilter.newest:
           return query.orderBy('createdAt', descending: true).snapshots();
         case MemoryFilter.oldest:
           return query.orderBy('createdAt', descending: false).snapshots();
@@ -95,48 +93,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       body: Column(
         children: [
-          // Divider(color: Colors.grey[300]),
-          if (_showFilter)
-            Column(
-              children: [
-                Container(
-                  color: Colors.transparent,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _filterButton('All', MemoryFilter.all),
-                      _filterButton('Newest', MemoryFilter.newest),
-                      _filterButton('Oldest', MemoryFilter.oldest),
-                      _filterButton('Month & Year', MemoryFilter.monthYear,
-                          additionalLogic: () {
-                        showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime.now(),
-                        ).then((pickedDate) {
-                          if (pickedDate != null) {
-                            setState(() {
-                              _selectedMonthYear = pickedDate;
-                              _selectedFilter = MemoryFilter.monthYear;
-                            });
-                          }
-                        });
-                      }),
-                    ],
-                  ),
+          Column(
+            children: [
+              Container(
+                color: Colors.transparent,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _filterButton('All', MemoryFilter.all),
+                    _filterButton('Oldest', MemoryFilter.oldest),
+                    _filterButton('Choose', MemoryFilter.monthYear,
+                        additionalLogic: () {
+                      showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now(),
+                      ).then((pickedDate) {
+                        if (pickedDate != null) {
+                          setState(() {
+                            _selectedMonthYear = pickedDate;
+                            _selectedFilter = MemoryFilter.monthYear;
+                          });
+                        }
+                      });
+                    }),
+                  ],
                 ),
-                Divider(color: Colors.grey[300]),
-              ],
-            ),
+              ),
+              Divider(color: Colors.grey[300]),
+            ],
+          ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: getMemoriesStream(),
               builder: (ctx, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return GridView.builder(
-                    controller: _scrollController,
                     padding: const EdgeInsets.all(10),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
@@ -158,7 +152,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 return Stack(
                   children: [
                     GridView.builder(
-                      controller: _scrollController,
                       padding: const EdgeInsets.all(10),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
