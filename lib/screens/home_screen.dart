@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:memories_app/providers/selection_notifier.dart';
@@ -9,7 +8,7 @@ import 'package:memories_app/screens/memories_detail_screen.dart';
 enum MemoryFilter { all, oldest, monthYear }
 
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -18,29 +17,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   MemoryFilter _selectedFilter = MemoryFilter.all;
   DateTime? _selectedMonthYear = DateTime.now();
-  // final ScrollController _scrollController = ScrollController();
-  // bool _showFilter = true;
-
-  // @override
-  // void initState() {
-  //   super.initState();
-
-  //   _scrollController.addListener(() {
-  //     if (_scrollController.position.userScrollDirection ==
-  //             ScrollDirection.reverse &&
-  //         _showFilter) {
-  //       setState(() {
-  //         _showFilter = false;
-  //       });
-  //     } else if (_scrollController.position.userScrollDirection ==
-  //             ScrollDirection.forward &&
-  //         !_showFilter) {
-  //       setState(() {
-  //         _showFilter = true;
-  //       });
-  //     }
-  //   });
-  // }
 
   Widget _buildShimmerItem() {
     return Shimmer.fromColors(
@@ -96,7 +72,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Column(
             children: [
               Container(
-                color: Colors.transparent,
+                color: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -122,7 +98,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
-              Divider(color: Colors.grey[300]),
             ],
           ),
           Expanded(
@@ -271,16 +246,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _filterButton(String label, MemoryFilter filter,
       {VoidCallback? additionalLogic}) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
+    return TextButton(
+      style: TextButton.styleFrom(
         backgroundColor:
             _selectedFilter == filter ? Colors.white : Colors.transparent,
-        foregroundColor:
-            _selectedFilter == filter ? Colors.black : Colors.black54,
+        foregroundColor: _selectedFilter == filter ? Colors.black : Colors.grey,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        elevation: _selectedFilter == filter ? 4 : 0,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       onPressed: () {
