@@ -106,13 +106,18 @@ class _AuthScreenState extends State<AuthScreen> {
     final style = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: style.brightness == Brightness.dark
+          ? Colors.grey[850]
+          : Colors.grey[50], // Adjusts background color based on theme
       body: Center(
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Card(
+                color: style.brightness == Brightness.dark
+                    ? Colors.grey[800]
+                    : Colors.white, // Adjusts card color based on theme
                 margin: const EdgeInsets.all(20),
                 child: SingleChildScrollView(
                   child: Padding(

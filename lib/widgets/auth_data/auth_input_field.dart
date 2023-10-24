@@ -25,12 +25,23 @@ class _AuthInputState extends State<AuthInput> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return TextFormField(
       keyboardType: widget.keyboardType,
       obscureText: widget.obsecureText && !_isVisible,
+      style: TextStyle(
+        color: theme.brightness == Brightness.dark
+            ? Colors.white
+            : Colors.black, // Set text color based on theme
+      ),
       decoration: InputDecoration(
         labelText: widget.labelText,
-        labelStyle: const TextStyle(fontSize: 13),
+        labelStyle: TextStyle(
+          fontSize: 13,
+          color: theme.brightness == Brightness.dark
+              ? Colors.white
+              : Colors.black, // Set label text color based on theme
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
         ),
