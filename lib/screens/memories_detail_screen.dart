@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:memories_app/screens/map_screen.dart';
+import 'package:photo_view/photo_view.dart';
 
 class MemoryDetailsScreen extends StatefulWidget {
   const MemoryDetailsScreen({
@@ -125,12 +126,11 @@ class _MemoryDetailsScreenState extends State<MemoryDetailsScreen> {
         decoration: const BoxDecoration(color: Colors.black),
         child: Stack(
           children: [
-            Image.network(
-              memoryData!['imageUrl'],
-              fit: BoxFit.contain,
-              height: double.infinity,
-              width: double.infinity,
-            ),
+           PhotoView(
+  imageProvider: NetworkImage(memoryData!['imageUrl']),
+  backgroundDecoration: BoxDecoration(color: Colors.black),
+),
+
             Positioned(
               bottom: 0,
               left: 0,
