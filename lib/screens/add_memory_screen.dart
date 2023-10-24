@@ -41,7 +41,7 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Title should be at least 4 characters.'), 
+          content: Text('Title should be at least 4 characters.'),
         ),
       );
       return;
