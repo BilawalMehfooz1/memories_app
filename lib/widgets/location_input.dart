@@ -60,7 +60,8 @@ class _LocationInputState extends State<LocationInput> {
     );
   }
 
-  Future<void> _getAddressFromLatLng({required double latitude, required double longitude}) async {
+  Future<void> _getAddressFromLatLng(
+      {required double latitude, required double longitude}) async {
     final url = Uri.parse(
         'https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&key=AIzaSyB-qF_ODijQOhNfpfI2IxmeIjYw0LeY5OE');
     final response = await http.get(url);
@@ -79,9 +80,12 @@ class _LocationInputState extends State<LocationInput> {
 
   @override
   Widget build(BuildContext context) {
-    Widget content = const Text(
+    Widget content = Text(
       'No location chosen',
       textAlign: TextAlign.center,
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.primary,
+      ),
     );
 
     if (_isGettingLocation) {
@@ -104,7 +108,7 @@ class _LocationInputState extends State<LocationInput> {
           decoration: BoxDecoration(
             border: Border.all(
               width: 1,
-              color: Colors.grey,
+              color: Theme.of(context).colorScheme.onBackground,
             ),
           ),
           child: content,

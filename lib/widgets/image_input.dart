@@ -43,7 +43,7 @@ class _ImageInputState extends State<ImageInput> {
     final pickedImage = await imagePicker.pickImage(
       source: ImageSource.gallery,
       maxWidth: 600,
-       maxHeight: 600,
+      maxHeight: 600,
     );
     if (pickedImage == null) {
       return;
@@ -97,7 +97,7 @@ class _ImageInputState extends State<ImageInput> {
       decoration: BoxDecoration(
         border: Border.all(
           width: 1,
-          color: Colors.black26,
+          color: Theme.of(context).colorScheme.onBackground,
         ),
       ),
       alignment: Alignment.center,

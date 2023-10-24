@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:flutter/material.dart';
 import 'package:memories_app/models/location.dart';
 import 'package:memories_app/widgets/image_input.dart';
@@ -42,7 +41,7 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Title should be at least 4 characters.'),
+          content: Text('Title should be at least 4 characters.'), 
         ),
       );
       return;
@@ -126,14 +125,23 @@ class _AddNewMemoryScreenState extends ConsumerState<AddNewMemoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
             TextField(
-              decoration: const InputDecoration(labelText: 'Title'),
+              decoration: InputDecoration(
+                labelText: 'Title',
+                labelStyle: TextStyle(
+                  color: isDarkTheme ? Colors.white : Colors.black,
+                ),
+              ),
               controller: _titleController,
+              style: TextStyle(
+                color: isDarkTheme ? Colors.white : Colors.black,
+              ),
             ),
             const SizedBox(height: 12),
             ImageInput(
