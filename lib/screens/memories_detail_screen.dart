@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -68,16 +69,19 @@ class _MemoryDetailsScreenState extends State<MemoryDetailsScreen> {
         await FirebaseFirestore.instance
             .collection('memories')
             .doc(widget.memoryId)
-            .update({'isFavorite': !currentStatus, 'favoritedAt': FieldValue.delete()}); // Notice the FieldValue.delete() here
+            .update({
+          'isFavorite': !currentStatus,
+          'favoritedAt': FieldValue.delete()
+        }); // Notice the FieldValue.delete() here
       } else {
         // If not favorited, mark as favorite and set the favoritedAt timestamp
         await FirebaseFirestore.instance
             .collection('memories')
             .doc(widget.memoryId)
             .update({
-              'isFavorite': !currentStatus,
-              'favoritedAt': Timestamp.now()  // Setting the timestamp here
-            });
+          'isFavorite': !currentStatus,
+          'favoritedAt': Timestamp.now() // Setting the timestamp here
+        });
       }
       if (!mounted) {
         return;
@@ -101,8 +105,7 @@ class _MemoryDetailsScreenState extends State<MemoryDetailsScreen> {
         ),
       );
     }
-}
-
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,11 +129,11 @@ class _MemoryDetailsScreenState extends State<MemoryDetailsScreen> {
         decoration: const BoxDecoration(color: Colors.black),
         child: Stack(
           children: [
-           PhotoView(
-  imageProvider: NetworkImage(memoryData!['imageUrl']),
-  backgroundDecoration: BoxDecoration(color: Colors.black),
-),
-
+            PhotoView(
+              imageProvider:
+                  CachedNetworkImageProvider(memoryData!['imageUrl']),
+              backgroundDecoration: const BoxDecoration(color: Colors.black),
+            ),
             Positioned(
               bottom: 0,
               left: 0,
@@ -164,7 +167,8 @@ class _MemoryDetailsScreenState extends State<MemoryDetailsScreen> {
                       },
                       child: CircleAvatar(
                         radius: 70,
-                        backgroundImage: NetworkImage(locationImage),
+                        backgroundImage:
+                            CachedNetworkImageProvider(locationImage),
                       ),
                     ),
                     Padding(
