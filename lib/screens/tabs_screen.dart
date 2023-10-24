@@ -58,9 +58,17 @@ class TabsScreen extends ConsumerWidget {
       bottomNavigationBar: selectionNotifier.isSelecting
           ? null
           : BottomNavigationBar(
+              backgroundColor: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black
+                  : Colors.white,
               currentIndex: currentTabIndex,
-              selectedItemColor: Colors.black,
-              unselectedItemColor: Colors.black,
+              selectedItemColor: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : Colors.black,
+              unselectedItemColor:
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey[500]
+                      : Colors.grey[600],
               onTap: (value) {
                 ref.read(tabScreenProvider.notifier).changeScreen(value);
               },
@@ -68,7 +76,7 @@ class TabsScreen extends ConsumerWidget {
                 BottomNavigationBarItem(
                   icon: Icon(
                     currentTabIndex == 0 ? Icons.home : Icons.home_outlined,
-                    size: 28,
+                    size: 25,
                   ),
                   label: 'Home',
                 ),
@@ -77,7 +85,7 @@ class TabsScreen extends ConsumerWidget {
                     currentTabIndex == 1
                         ? Icons.add_circle
                         : Icons.add_circle_outline,
-                    size: 35,
+                    size: 30,
                   ),
                   label: 'Add',
                 ),
@@ -86,7 +94,7 @@ class TabsScreen extends ConsumerWidget {
                     currentTabIndex == 2
                         ? Icons.favorite
                         : Icons.favorite_border,
-                    size: 28,
+                    size: 25,
                   ),
                   label: 'Favorites',
                 ),
