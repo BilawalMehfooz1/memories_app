@@ -11,8 +11,8 @@ class LocationInput extends StatefulWidget {
 
   const LocationInput({
     required this.onSaveLocation,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<LocationInput> createState() => _LocationInputState();

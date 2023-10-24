@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -105,12 +106,15 @@ class FavoriteScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(12),
                         child: Stack(
                           children: [
-                            Image.network(
-                              memory['imageUrl'],
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                            ),
+                            CachedNetworkImage(
+                                imageUrl: memory['imageUrl'],
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                                placeholder: (context, url) =>
+                                    _buildShimmerItem(),
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.error)),
                             if (isSelected)
                               Positioned(
                                 top: 10,

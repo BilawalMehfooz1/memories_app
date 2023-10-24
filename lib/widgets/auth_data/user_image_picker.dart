@@ -1,13 +1,12 @@
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class UserImagePicker extends StatefulWidget {
   const UserImagePicker({
-    Key? key,
+    super.key,
     required this.onPickedImage,
-  }) : super(key: key);
+  });
 
   final void Function(File pickedImage) onPickedImage;
 
@@ -18,33 +17,17 @@ class UserImagePicker extends StatefulWidget {
 class _UserImagePickerState extends State<UserImagePicker> {
   File? _pickedImageFile;
 
-  Future<void> _compressAndSetImage(File image) async {
-    final result = await FlutterImageCompress.compressAndGetFile(
-      image.absolute.path,
-      image.absolute
-          .path, // This path denotes that the compressed image will overwrite the original image
-      quality: 90, // Compression quality. Adjust as needed.
-    );
-
-    if (result != null) {
-      setState(() {
-        _pickedImageFile =
-            File(result.path); // Here, result should be of type File.
-      });
-      widget.onPickedImage(_pickedImageFile!);
-    }
-  }
-
   void _pickImage() async {
     final pickedImage = await ImagePicker().pickImage(
       source: ImageSource.camera,
     );
 
-    if (pickedImage == null) {
-      return;
+    if (pickedImage != null) {
+      setState(() {
+        _pickedImageFile = File(pickedImage.path);
+      });
+      widget.onPickedImage(_pickedImageFile!);
     }
-
-    await _compressAndSetImage(File(pickedImage.path));
   }
 
   void _pickGalleryImage() async {
@@ -52,11 +35,12 @@ class _UserImagePickerState extends State<UserImagePicker> {
       source: ImageSource.gallery,
     );
 
-    if (pickedImage == null) {
-      return;
+    if (pickedImage != null) {
+      setState(() {
+        _pickedImageFile = File(pickedImage.path);
+      });
+      widget.onPickedImage(_pickedImageFile!);
     }
-
-    await _compressAndSetImage(File(pickedImage.path));
   }
 
   @override
