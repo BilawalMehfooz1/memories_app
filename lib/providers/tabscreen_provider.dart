@@ -1,4 +1,4 @@
-import 'package:memories_app/screens/profile_screen.dart';
+import 'package:memories_app/screens/setting_screen.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +7,7 @@ import 'package:memories_app/screens/home_screen.dart';
 import 'package:memories_app/screens/favorites_screen.dart';
 import 'package:memories_app/screens/add_memory_screen.dart';
 
-enum MenuOptions { profile, setting }
+enum MenuOptions { setting }
 
 class TabScreenNotifier extends StateNotifier<int> {
   TabScreenNotifier() : super(0);
@@ -38,17 +38,10 @@ class TabScreenNotifier extends StateNotifier<int> {
             icon: const Icon(Icons.more_vert),
             onSelected: (MenuOptions result) {
               switch (result) {
-                case MenuOptions.profile:
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const ProfileScreen(),
-                    ),
-                  );
-                  break;
                 case MenuOptions.setting:
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => Placeholder(),
+                      builder: (context) => const SettingsScreen(),
                     ),
                   );
                   break;
@@ -56,10 +49,6 @@ class TabScreenNotifier extends StateNotifier<int> {
             },
             itemBuilder: (BuildContext context) =>
                 <PopupMenuEntry<MenuOptions>>[
-              const PopupMenuItem<MenuOptions>(
-                value: MenuOptions.profile,
-                child: Text('Profile'),
-              ),
               const PopupMenuItem<MenuOptions>(
                 value: MenuOptions.setting,
                 child: Text('Settings'),

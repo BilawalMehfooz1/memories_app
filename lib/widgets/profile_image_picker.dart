@@ -14,7 +14,7 @@ class LocalUserImagePicker extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _LocalUserImagePickerState createState() => _LocalUserImagePickerState();
+  State<LocalUserImagePicker> createState() => _LocalUserImagePickerState();
 }
 
 class _LocalUserImagePickerState extends State<LocalUserImagePicker> {

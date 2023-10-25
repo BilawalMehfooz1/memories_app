@@ -53,6 +53,7 @@ dependencies:
   cached_network_image: ^3.3.0
   connectivity: ^3.0.6
   flutter_local_notifications: ^16.1.0
+  state_notifier: ^1.0.0
 
 dev_dependencies:
   flutter_test:
