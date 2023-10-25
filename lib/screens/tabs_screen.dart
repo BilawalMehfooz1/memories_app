@@ -5,7 +5,7 @@ import 'package:memories_app/providers/tabscreen_provider.dart';
 import 'package:memories_app/providers/selection_notifier.dart';
 
 class TabsScreen extends ConsumerWidget {
-  const TabsScreen({Key? key}) : super(key: key);
+  const TabsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -14,6 +14,7 @@ class TabsScreen extends ConsumerWidget {
     final selectionNotifier = ref.watch(selectionNotifierProvider);
     final currentScreenData =
         ref.read(tabScreenProvider.notifier).currentScreenData(context);
+
     return Scaffold(
       appBar: selectionNotifier.isSelecting
           ? AppBar(

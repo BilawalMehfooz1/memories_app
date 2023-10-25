@@ -11,9 +11,9 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  final user = FirebaseAuth.instance.currentUser;
   String? _username;
   String? _profileImageUrl;
+  final user = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {

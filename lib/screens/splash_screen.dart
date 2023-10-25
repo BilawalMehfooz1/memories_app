@@ -7,10 +7,15 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Memories'),
+        title: Text(
+          'Memories',
+          style: TextStyle(color: Theme.of(context).colorScheme.onBackground),
+        ),
       ),
-      body: const Center(
-        child: Text('Loading...'),
+      body: Center(
+        child: Text('Loading...',
+            style:
+                TextStyle(color: Theme.of(context).colorScheme.onBackground)),
       ),
     );
   }

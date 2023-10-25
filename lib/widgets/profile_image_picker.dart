@@ -10,8 +10,8 @@ class LocalUserImagePicker extends StatefulWidget {
   const LocalUserImagePicker({
     required this.onPickedImage,
     this.currentImageUrl,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<LocalUserImagePicker> createState() => _LocalUserImagePickerState();
@@ -24,7 +24,6 @@ class _LocalUserImagePickerState extends State<LocalUserImagePicker> {
   void _pickImage() async {
     final pickedImage = await ImagePicker().pickImage(
       source: ImageSource.camera,
-      imageQuality: 50,
       maxWidth: 150,
     );
 
