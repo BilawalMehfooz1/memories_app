@@ -51,7 +51,7 @@ class _AuthInputState extends State<AuthInput> {
           borderRadius: BorderRadius.circular(15),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.red),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
           borderRadius: BorderRadius.circular(15),
         ),
         suffixIcon: widget.obsecureText

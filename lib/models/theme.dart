@@ -30,7 +30,7 @@ final ThemeData darkTheme = ThemeData(
   useMaterial3: true,
   brightness: Brightness.dark,
   colorScheme: const ColorScheme.dark(
-    primary: Color.fromRGBO(178, 5, 31, 1),
+    primary: Color.fromRGBO(5, 178, 74, 1),
     surface: Color.fromRGBO(
         45, 45, 45, 1), // This would be your primary dark background color
     background: Color.fromRGBO(
