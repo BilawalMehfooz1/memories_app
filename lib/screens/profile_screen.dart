@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:memories_app/widgets/profile_image_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final String? username;
+  final String? profileImageUrl;
+
+  const ProfileScreen({this.username, this.profileImageUrl, Key? key})
+      : super(key: key);
+
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
@@ -15,32 +19,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   File? _userImageFile;
-  String? userEmail;
-  String? currentProfileImage;
-  String? currentUsername;
 
   @override
   void initState() {
     super.initState();
-    final user = FirebaseAuth.instance.currentUser;
-    FirebaseFirestore.instance
-        .collection('users')
-        .doc(user!.uid)
-        .get()
-        .then((userData) {
-      if (mounted) {
-        setState(() {
-          userEmail = user.email;
-          currentProfileImage = userData['image_url'];
-          currentUsername = userData['username'];
-          _nameController.text = currentUsername ?? '';
-        });
-      }
-    });
-  }
-
-  void _pickedImage(File image) {
-    _userImageFile = image;
+    _nameController.text = widget.username ?? '';
   }
 
   Future<void> _saveProfile() async {
@@ -106,72 +89,117 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  void _editUsername(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (ctx) {
+          return SingleChildScrollView(
+            child: Padding(
+              padding:
+                  EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Text('Please enter username',
+                          style: TextStyle(
+                              color: Theme.of(ctx).colorScheme.onBackground,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: TextField(
+                      controller: _nameController,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onBackground,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                        },
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          _saveProfile();
+                          Navigator.of(ctx).pop();
+                        },
+                        child: const Text('Save'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
+    ThemeMode currentThemeMode =
+        Theme.of(context).brightness == Brightness.light
+            ? ThemeMode.light
+            : ThemeMode.dark;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
-        elevation: 0.5,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
-            LocalUserImagePicker(
-                onPickedImage: _pickedImage,
-                currentImageUrl: currentProfileImage),
-            const SizedBox(height: 16),
-            // if (userEmail != null)
-            //   ListTile(
-            //     leading: const Icon(Icons.email),
-            //     title: Text(userEmail!),
-            //   ),
-            // const Divider(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: TextFormField(
-                controller: _nameController,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onBackground,
-                ),
-                decoration: InputDecoration(
-                  labelText: 'Username',
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12.0, vertical: 8.0),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter a name.';
-                  }
-                  if (value.length < 4) {
-                    return 'Name should be at least 4 characters long.';
-                  }
-                  return null;
-                },
+      body: Column(
+        children: [
+          const SizedBox(height: 40),
+          CircleAvatar(
+            radius: 80,
+            backgroundImage: widget.profileImageUrl != null
+                ? NetworkImage(widget.profileImageUrl!)
+                : null,
+            child: IconButton(
+              icon: const Icon(Icons.camera_alt),
+              onPressed: () {
+                // TODO: Open the image picker here
+              },
+            ),
+          ),
+          const SizedBox(height: 20),
+          ListTile(
+            leading: const Icon(
+              Icons.person,
+              size: 30,
+            ),
+            title: Text(
+              _nameController.text,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _saveProfile,
-              style: ElevatedButton.styleFrom(
-                elevation: 2,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                textStyle: const TextStyle(
-                  fontSize: 20,
-                ),
+            subtitle: Text(
+              'This is the username that you entered while creating account.',
+              style: TextStyle(
+                color: currentThemeMode == ThemeMode.dark
+                    ? Colors.grey[500]
+                    : Colors.black54,
               ),
-              child: const Text('Save Profile'),
             ),
-            const SizedBox(height: 20),
-          ],
-        ),
+            trailing: IconButton(
+              icon: Icon(Icons.edit,
+                  color: Theme.of(context).colorScheme.primary),
+              onPressed: () => _editUsername(context),
+            ),
+          ),
+        ],
       ),
     );
   }

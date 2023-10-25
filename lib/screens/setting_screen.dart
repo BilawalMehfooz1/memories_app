@@ -88,7 +88,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => const ProfileScreen(),
+                  builder: (context) => ProfileScreen(
+                    username: _username,
+                    profileImageUrl: _profileImageUrl,
+                  ),
                 ),
               );
             },
