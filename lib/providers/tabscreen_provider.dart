@@ -1,3 +1,4 @@
+import 'package:memories_app/screens/profile_screen.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,7 +41,7 @@ class TabScreenNotifier extends StateNotifier<int> {
                 case MenuOptions.profile:
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => Placeholder(),
+                      builder: (context) => const ProfileScreen(),
                     ),
                   );
                   break;
