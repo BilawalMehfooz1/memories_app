@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memories_app/providers/profile_photo_provider.dart';
+import 'package:memories_app/screens/profile_image_preview_screen.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   final String? username;
   final String? userEmail;
   final String? profileImageUrl;
@@ -18,10 +21,10 @@ class ProfileScreen extends StatefulWidget {
   });
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _nameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   File? _userImageFile;
@@ -155,6 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final showImagePicker = ref.watch(imagePickerProvider);
     ThemeMode currentThemeMode =
         Theme.of(context).brightness == Brightness.light
             ? ThemeMode.light
@@ -169,35 +173,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Stack(
             alignment: Alignment.bottomRight,
             children: [
-              // Circular Avatar
-              Container(
-                width: 160, // 2 * the radius
-                height: 160,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white, width: 0.5),
-                  shape: BoxShape.circle,
-                ),
-                child: widget.profileImageUrl != null
-                    ? CircleAvatar(
-                        radius: 80,
-                        backgroundImage: CachedNetworkImageProvider(
-                          widget.profileImageUrl!,
-                        ),
-                      )
-                    : const Icon(
-                        Icons.person,
-                        size: 80, // this size might need adjustment
-                        color:
-                            Colors.grey, // adjust the color based on your theme
-                      ),
-              ),
-              // Camera Icon
               GestureDetector(
                 onTap: () {
-                  // TODO: Open the image picker here
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (ctx) => ProfileImagePreview(
+                        imageUrl: widget.profileImageUrl!,
+                      ),
+                    ),
+                  );
                 },
                 child: Container(
-                  width: 40, // Size of the camera icon container
+                  width: 160, // 2 * the radius
+                  height: 160,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white, width: 0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: widget.profileImageUrl != null
+                      ? CircleAvatar(
+                          radius: 80,
+                          backgroundImage: CachedNetworkImageProvider(
+                            widget.profileImageUrl!,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.person,
+                          size: 80,
+                          color: Colors.grey,
+                        ),
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  width: 40,
                   height: 40,
                   decoration: BoxDecoration(
                     color: Theme.of(context).brightness == Brightness.dark
@@ -205,11 +216,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         : const Color.fromRGBO(5, 178, 74, 1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.camera_alt,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.black
-                        : Colors.white,
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.camera_alt,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.black
+                          : Colors.white,
+                    ),
+                    onPressed: () {
+                      showImagePicker(context);
+                    },
                   ),
                 ),
               ),
