@@ -166,18 +166,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: Column(
         children: [
           const SizedBox(height: 40),
-          CircleAvatar(
-            radius: 80,
-            backgroundImage: widget.profileImageUrl != null
-                ? CachedNetworkImageProvider(widget
-                    .profileImageUrl!) 
-                : null,
-            child: IconButton(
-              icon: const Icon(Icons.camera_alt),
-              onPressed: () {
-                // TODO: Open the image picker here
-              },
-            ),
+          Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              // Circular Avatar
+              Container(
+                width: 160, // 2 * the radius
+                height: 160,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.white, width: 0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: widget.profileImageUrl != null
+                    ? CircleAvatar(
+                        radius: 80,
+                        backgroundImage: CachedNetworkImageProvider(
+                          widget.profileImageUrl!,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.person,
+                        size: 80, // this size might need adjustment
+                        color:
+                            Colors.grey, // adjust the color based on your theme
+                      ),
+              ),
+              // Camera Icon
+              GestureDetector(
+                onTap: () {
+                  // TODO: Open the image picker here
+                },
+                child: Container(
+                  width: 40, // Size of the camera icon container
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Theme.of(context).colorScheme.primary
+                        : const Color.fromRGBO(5, 178, 74, 1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.camera_alt,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.black
+                        : Colors.white,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 20),
           Padding(
