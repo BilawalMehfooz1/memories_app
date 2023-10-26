@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,10 +7,15 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String? username;
+  final String? userEmail;
   final String? profileImageUrl;
 
-  const ProfileScreen({this.username, this.profileImageUrl, Key? key})
-      : super(key: key);
+  const ProfileScreen({
+    this.username,
+    this.userEmail,
+    this.profileImageUrl,
+    super.key,
+  });
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -163,7 +169,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           CircleAvatar(
             radius: 80,
             backgroundImage: widget.profileImageUrl != null
-                ? NetworkImage(widget.profileImageUrl!)
+                ? CachedNetworkImageProvider(widget
+                    .profileImageUrl!) 
                 : null,
             child: IconButton(
               icon: const Icon(Icons.camera_alt),
@@ -173,32 +180,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          ListTile(
-            leading: const Icon(
-              Icons.person,
-              size: 30,
-            ),
-            title: Text(
-              _nameController.text,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            subtitle: Text(
-              'This is the username that you entered while creating account.',
-              style: TextStyle(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: ListTile(
+              leading: Icon(
+                Icons.person,
+                size: 30,
                 color: currentThemeMode == ThemeMode.dark
                     ? Colors.grey[500]
                     : Colors.black54,
               ),
-            ),
-            trailing: IconButton(
-              icon: Icon(Icons.edit,
-                  color: Theme.of(context).colorScheme.primary),
-              onPressed: () => _editUsername(context),
+              title: Text(
+                _nameController.text,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              subtitle: Text(
+                'This is the username that you entered while creating account.',
+                style: TextStyle(
+                  color: currentThemeMode == ThemeMode.dark
+                      ? Colors.grey[500]
+                      : Colors.black54,
+                ),
+              ),
+              trailing: IconButton(
+                icon: const Icon(
+                  Icons.edit,
+                  color: Color.fromRGBO(7, 152, 65, 1),
+                ),
+                onPressed: () => _editUsername(context),
+              ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 20,
+            ),
+            child: ListTile(
+              leading: Icon(
+                Icons.email,
+                size: 30,
+                color: currentThemeMode == ThemeMode.dark
+                    ? Colors.grey[500]
+                    : Colors.black54,
+              ),
+              title: Text(
+                widget.userEmail.toString(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              subtitle: Text(
+                'This is the email that you entered while creating account.',
+                style: TextStyle(
+                  color: currentThemeMode == ThemeMode.dark
+                      ? Colors.grey[500]
+                      : Colors.black54,
+                ),
+              ),
+            ),
+          )
         ],
       ),
     );

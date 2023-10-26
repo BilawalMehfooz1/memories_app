@@ -28,7 +28,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
   void _submit() async {
     UserCredential userCredentials;
-    //  final isValid= _form.currentState!.validate();
 
     if (!_isLogin && _selectedImage == null) {
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -95,9 +94,11 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
     } finally {
-      setState(() {
-        _isAuthenticating = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isAuthenticating = false;
+        });
+      }
     }
   }
 

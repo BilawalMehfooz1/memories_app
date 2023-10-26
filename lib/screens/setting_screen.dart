@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +13,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String? _username;
+  String? _userEmail;
   String? _profileImageUrl;
   final user = FirebaseAuth.instance.currentUser;
 
@@ -29,18 +31,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           .get();
       setState(() {
         _username = userData['username'];
+        _userEmail = userData['email'];
         _profileImageUrl = userData['image_url'];
       });
     }
   }
 
   Future<void> _handleSignOut(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
-    if (!mounted) {
-      return;
+    try {
+      await FirebaseAuth.instance.signOut();
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).popUntil((route) =>
+          route.isFirst); // This ensures you go back to the root screen.
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error occurred during logout.'),
+        ),
+      );
     }
-    Navigator.of(context).pop();
-    Navigator.of(context).pop();
   }
 
   void _confirmSignOut(BuildContext context) {
@@ -90,6 +104,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 MaterialPageRoute(
                   builder: (context) => ProfileScreen(
                     username: _username,
+                    userEmail: _userEmail,
                     profileImageUrl: _profileImageUrl,
                   ),
                 ),
@@ -100,15 +115,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Row(
                 children: [
                   CircleAvatar(
-                    radius: 40, // Increase this for a larger avatar
+                    radius: 40,
                     backgroundImage: (_profileImageUrl != null &&
                             _profileImageUrl!.isNotEmpty)
-                        ? NetworkImage(_profileImageUrl!)
+                        ? CachedNetworkImageProvider(_profileImageUrl!)
                         : null,
                     child:
                         (_profileImageUrl == null || _profileImageUrl!.isEmpty)
-                            ? const Icon(Icons.person,
-                                size: 50) // Adjust this size too
+                            ? const Icon(Icons.person, size: 50)
                             : null,
                   ),
                   const SizedBox(width: 20),
@@ -123,7 +137,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             color: Theme.of(context).colorScheme.onBackground),
                       ),
                       Text(
-                        user?.email ?? 'Loading...',
+                        _userEmail ?? 'Loading...',
                         style: TextStyle(
                             color: Theme.of(context).colorScheme.onSurface),
                       )

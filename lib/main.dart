@@ -30,14 +30,14 @@ class MyApp extends ConsumerWidget {
       darkTheme: darkTheme,
       home: StreamBuilder(
         stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const SplashScreen();
+        builder: (ctx, AsyncSnapshot<User?> snapshot) {
+          if (snapshot.connectionState == ConnectionState.active) {
+            if (snapshot.data == null) {
+              return const AuthScreen(); // Unauthenticated user
+            }
+            return const TabsScreen(); // Authenticated user
           }
-          if (snapshot.hasData) {
-            return const TabsScreen();
-          }
-          return const AuthScreen();
+          return const SplashScreen(); // Still determining authentication state
         },
       ),
     );
