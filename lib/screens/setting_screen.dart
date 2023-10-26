@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:memories_app/main.dart';
 import 'package:memories_app/screens/profile_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -35,7 +34,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _userEmail = userData['email'];
         _profileImageUrl = userData['image_url'];
       });
-      print('Finished fetching user data.');
     }
   }
 

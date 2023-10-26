@@ -34,9 +34,7 @@ void _showImageOptionsModal(BuildContext context) {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               trailing: IconButton(
                 icon: const Icon(Icons.delete, color: Colors.grey),
-                onPressed: () {
-                  // TODO: Handle delete action here
-                },
+                onPressed: () {},
               ),
             ),
             Padding(
@@ -49,9 +47,7 @@ void _showImageOptionsModal(BuildContext context) {
                     icon: Icons.camera_alt,
                     label: 'Camera',
                     theme: Theme.of(ctx),
-                    onTap: () {
-                      // TODO: Handle camera option
-                    },
+                    onTap: () {},
                   ),
                   const SizedBox(width: 20.0),
                   _buildOption(
@@ -59,9 +55,7 @@ void _showImageOptionsModal(BuildContext context) {
                     icon: Icons.photo_library,
                     label: 'Gallery',
                     theme: Theme.of(ctx),
-                    onTap: () {
-                      // TODO: Handle gallery option
-                    },
+                    onTap: () {},
                   ),
                 ],
               ),

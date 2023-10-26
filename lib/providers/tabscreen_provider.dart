@@ -1,4 +1,3 @@
-import 'package:memories_app/screens/daily_verse_screen.dart';
 import 'package:memories_app/screens/setting_screen.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter/material.dart';
@@ -25,17 +24,6 @@ class TabScreenNotifier extends StateNotifier<int> {
         return const Tuple3(FavoriteScreen(), 'Favorite Memories', []);
       default:
         List<Widget> homeActions = [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const QuranVerseScreen(),
-                ),
-              );
-            },
-            icon: const Icon(Icons.menu_book_rounded),
-          ),
           PopupMenuButton<MenuOptions>(
             offset: const Offset(0, 50),
             elevation: 3.2,

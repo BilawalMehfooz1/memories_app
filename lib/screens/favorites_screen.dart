@@ -12,7 +12,7 @@ class FavoriteScreen extends ConsumerStatefulWidget {
   const FavoriteScreen({Key? key}) : super(key: key);
 
   @override
-  _FavoriteScreenState createState() => _FavoriteScreenState();
+  ConsumerState<FavoriteScreen> createState() => _FavoriteScreenState();
 }
 
 class _FavoriteScreenState extends ConsumerState<FavoriteScreen> {
