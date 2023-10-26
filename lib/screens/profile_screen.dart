@@ -1,10 +1,8 @@
-import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:memories_app/providers/profile_photo_provider.dart';
 import 'package:memories_app/screens/profile_image_preview_screen.dart';
 
@@ -27,7 +25,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _nameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  File? _userImageFile;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -35,125 +33,117 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _nameController.text = widget.username ?? '';
   }
 
-  Future<void> _saveProfile() async {
-    final isValid = _formKey.currentState!.validate();
-    if (!isValid) {
-      // Form isn't valid!
-      return;
-    }
+  Future<void> _saveUserName() async {
+    setState(() {
+      _isLoading = true;
+    });
 
-    // Show a confirmation dialog
-    final isConfirmed = await showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Confirmation'),
-            content: const Text('Do you really want to save the changes?'),
-            actions: [
-              TextButton(
-                child: const Text('No'),
-                onPressed: () {
-                  Navigator.of(ctx).pop(false);
-                },
-              ),
-              TextButton(
-                child: const Text('Yes'),
-                onPressed: () {
-                  Navigator.of(ctx).pop(true);
-                },
-              ),
-            ],
-          ),
-        ) ??
-        false;
+    final isValid = _formKey.currentState?.validate() ?? false;
+    if (!isValid) return;
 
-    if (!isConfirmed) {
-      return;
-    }
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final uid = user.uid;
 
-    if (_userImageFile == null) {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'username': _nameController.text,
+      });
+      setState(() {
+        _nameController.text = _nameController.text;
+      });
+    } catch (error) {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please pick an image!'),
-        ),
-      );
-      return;
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Failed to update username.'),
+          ),
+        );
     }
 
-    final user = FirebaseAuth.instance.currentUser;
-
-    final ref = FirebaseStorage.instance
-        .ref()
-        .child('user_images')
-        .child('${user!.uid}.jpg');
-
-    await ref.putFile(_userImageFile!);
-    final imageUrl = await ref.getDownloadURL();
-
-    await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-      'username': _nameController.text,
-      'image_url': imageUrl,
+    setState(() {
+      _isLoading = false;
     });
   }
 
   void _editUsername(BuildContext context) {
     showModalBottomSheet(
-        context: context,
-        builder: (ctx) {
-          return SingleChildScrollView(
-            child: Padding(
-              padding:
-                  EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Text('Please enter username',
-                          style: TextStyle(
-                              color: Theme.of(ctx).colorScheme.onBackground,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: TextField(
-                      controller: _nameController,
+      context: context,
+      builder: (ctx) => SingleChildScrollView(
+        child: Padding(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Text(
+                      'Please enter username',
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.onBackground,
+                        color: Theme.of(ctx).colorScheme.onBackground,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(ctx).pop();
-                        },
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          _saveProfile();
-                          Navigator.of(ctx).pop();
-                        },
-                        child: const Text('Save'),
-                      ),
-                    ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: TextFormField(
+                    controller: _nameController,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Username cannot be empty';
+                      }
+                      return null;
+                    },
                   ),
-                  const SizedBox(height: 20),
-                ],
-              ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed:
+                          _isLoading ? null : () => Navigator.of(ctx).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                    _isLoading
+                        ? const CircularProgressIndicator()
+                        : TextButton(
+                            onPressed: _isLoading
+                                ? null
+                                : () async {
+                                    await _saveUserName();
+                                    if (!mounted) {
+                                      return;
+                                    }
+                                    Navigator.of(context)
+                                        .pop(_nameController.text);
+                                  },
+                            child: const Text('Save'),
+                          ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
-          );
-        });
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -163,6 +153,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         Theme.of(context).brightness == Brightness.light
             ? ThemeMode.light
             : ThemeMode.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
@@ -184,7 +175,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   );
                 },
                 child: Container(
-                  width: 160, // 2 * the radius
+                  width: 160,
                   height: 160,
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.white, width: 0.5),

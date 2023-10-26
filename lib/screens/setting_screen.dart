@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:memories_app/main.dart';
 import 'package:memories_app/screens/profile_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -34,6 +35,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _userEmail = userData['email'];
         _profileImageUrl = userData['image_url'];
       });
+      print('Finished fetching user data.');
     }
   }
 
@@ -99,8 +101,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: ListView(
         children: [
           InkWell(
-            onTap: () {
-              Navigator.of(context).push(
+            onTap: () async {
+              var updatedUsername = await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ProfileScreen(
                     username: _username,
@@ -109,6 +111,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ),
               );
+              if (updatedUsername != null) {
+                setState(() {
+                  _username = updatedUsername;
+                });
+              }
             },
             child: Padding(
               padding: const EdgeInsets.all(16.0),

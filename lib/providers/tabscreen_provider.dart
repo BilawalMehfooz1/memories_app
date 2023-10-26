@@ -1,3 +1,4 @@
+import 'package:memories_app/screens/daily_verse_screen.dart';
 import 'package:memories_app/screens/setting_screen.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,12 @@ class TabScreenNotifier extends StateNotifier<int> {
         List<Widget> homeActions = [
           IconButton(
             onPressed: () {
-              // FirebaseAuth.instance.signOut();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const QuranVerseScreen(),
+                ),
+              );
             },
             icon: const Icon(Icons.menu_book_rounded),
           ),
