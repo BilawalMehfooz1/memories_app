@@ -187,7 +187,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   width: 160, // 2 * the radius
                   height: 160,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 1),
+                    border: Border.all(color: Colors.white, width: 0.5),
                     shape: BoxShape.circle,
                   ),
                   child: widget.profileImageUrl != null

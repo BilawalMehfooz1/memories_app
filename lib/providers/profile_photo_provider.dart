@@ -1,20 +1,11 @@
-import 'dart:io';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
-
-final _firebase = FirebaseAuth.instance;
-
-final profilePictureUrlProvider = StateProvider<String?>((ref) => null);
 
 final imagePickerProvider = Provider<void Function(BuildContext)>((ref) {
-  return (context) => _showImageOptionsModal(context, ref);
+  return (context) => _showImageOptionsModal(context);
 });
 
-void _showImageOptionsModal(BuildContext context, ProviderRef ref) {
+void _showImageOptionsModal(BuildContext context) {
   showModalBottomSheet(
     context: context,
     shape: const RoundedRectangleBorder(
@@ -28,7 +19,7 @@ void _showImageOptionsModal(BuildContext context, ProviderRef ref) {
           children: [
             Center(
               child: Container(
-                margin: const EdgeInsets.only(bottom: 15.0),
+                margin: const EdgeInsets.only(bottom: 15.0), // Increased space
                 height: 5.0,
                 width: 30.0,
                 decoration: BoxDecoration(
@@ -43,40 +34,14 @@ void _showImageOptionsModal(BuildContext context, ProviderRef ref) {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               trailing: IconButton(
                 icon: const Icon(Icons.delete, color: Colors.grey),
-                onPressed: () async {
-                  _showLoadingDialog(context);
-                  final currentUser = _firebase.currentUser;
-                  if (currentUser != null) {
-                    final uid = currentUser.uid;
-                    final userDocRef =
-                        FirebaseFirestore.instance.collection('users').doc(uid);
-                    try {
-                      await userDocRef.update({'image_url': FieldValue.delete()});
-
-                      // Update the profilePictureUrlProvider state to null
-                      ref.read(profilePictureUrlProvider.notifier).state = null;
-
-                      Navigator.pop(context); // Close the loading dialog
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Profile photo deleted successfully!'),
-                        ),
-                      );
-                      Navigator.pop(context); // Close the modal sheet
-                    } catch (error) {
-                      Navigator.pop(context); // Close the loading dialog
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Error deleting photo: $error'),
-                        ),
-                      );
-                    }
-                  }
+                onPressed: () {
+                  // TODO: Handle delete action here
                 },
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 15.0, top: 10.0),
+              padding: const EdgeInsets.only(
+                  left: 15.0, top: 10.0), // Increased space
               child: Row(
                 children: [
                   _buildOption(
@@ -84,12 +49,8 @@ void _showImageOptionsModal(BuildContext context, ProviderRef ref) {
                     icon: Icons.camera_alt,
                     label: 'Camera',
                     theme: Theme.of(ctx),
-                    onTap: () async {
-                      Navigator.pop(context); // Close the modal sheet
-                      final pickedImage = await _pickImage(ImageSource.camera);
-                      if (pickedImage != null) {
-                        await _uploadImage(pickedImage, context, ref);
-                      }
+                    onTap: () {
+                      // TODO: Handle camera option
                     },
                   ),
                   const SizedBox(width: 20.0),
@@ -98,12 +59,8 @@ void _showImageOptionsModal(BuildContext context, ProviderRef ref) {
                     icon: Icons.photo_library,
                     label: 'Gallery',
                     theme: Theme.of(ctx),
-                    onTap: () async {
-                      Navigator.pop(context); // Close the modal sheet
-                      final pickedImage = await _pickImage(ImageSource.gallery);
-                      if (pickedImage != null) {
-                        await _uploadImage(pickedImage, context, ref);
-                      }
+                    onTap: () {
+                      // TODO: Handle gallery option
                     },
                   ),
                 ],
@@ -114,46 +71,6 @@ void _showImageOptionsModal(BuildContext context, ProviderRef ref) {
       );
     },
   );
-}
-
-Future<File?> _pickImage(ImageSource source) async {
-  final picker = ImagePicker();
-  final pickedFile = await picker.pickImage(source: source);
-  return pickedFile != null ? File(pickedFile.path) : null;
-}
-
-Future<void> _uploadImage(File image, BuildContext context, ProviderRef ref) async {
-  _showLoadingDialog(context);
-  final currentUser = _firebase.currentUser;
-  if (currentUser != null) {
-    final uid = currentUser.uid;
-    final storageRef =
-        FirebaseStorage.instance.ref().child('user_images').child('$uid.jpg');
-    final userDocRef = FirebaseFirestore.instance.collection('users').doc(uid);
-
-    try {
-      await storageRef.putFile(image);
-      final imageUrl = await storageRef.getDownloadURL();
-      await userDocRef.update({'image_url': imageUrl});
-
-      // Update the profilePictureUrlProvider state
-      ref.read(profilePictureUrlProvider.notifier).state = imageUrl;
-
-      Navigator.pop(context); // Close the loading dialog
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile photo updated successfully!'),
-        ),
-      );
-    } catch (error) {
-      Navigator.pop(context); // Close the loading dialog
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error uploading photo: $error'),
-        ),
-      );
-    }
-  }
 }
 
 Widget _buildOption({
@@ -168,9 +85,14 @@ Widget _buildOption({
     children: [
       CircleAvatar(
         radius: 25,
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme.of(context)
+            .colorScheme
+            .background, // Set to scaffold background
         child: IconButton(
-          icon: Icon(icon, color: const Color.fromRGBO(5, 178, 74, 1)),
+          icon: Icon(
+            icon,
+            color: const Color.fromRGBO(5, 178, 74, 1),
+          ),
           onPressed: onTap,
         ),
       ),
@@ -180,28 +102,10 @@ Widget _buildOption({
         style: TextStyle(
           color: theme.brightness == Brightness.light
               ? Colors.black
-              : Colors.white,
+              : Colors.white, // Set text color based on theme brightness
         ),
       ),
       const SizedBox(height: 10),
     ],
-  );
-}
-
-void _showLoadingDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (context) {
-      return AlertDialog(
-        content: Row(
-          children: [
-            CircularProgressIndicator(),
-            const SizedBox(width: 20),
-            Text("Processing..."),
-          ],
-        ),
-      );
-    },
   );
 }
